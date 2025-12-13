@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>活动后台管理</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>活动后台管理</h1>
+      <p>上传活动：图片、名称、描述、起始时间、截止时间、标签</p>
+    </div>
+  </header>
+  <main class="container">
+    <form id="event-form" class="admin-form">
+      <!-- 图片上传与预览（中文注释） -->
+      <div class="form-row">
+        <label>活动图片</label>
+        <input type="file" id="image" accept="image/*" required>
+        <div class="preview" id="preview"></div>
+      </div>
+      <!-- 基本信息 -->
+      <div class="form-row">
+        <label>活动名称</label>
+        <input type="text" id="title" placeholder="例如：哈基米唱歌大赛S2" required>
+      </div>
+      <div class="form-row">
+        <label>活动名称（English）</label>
+        <input type="text" id="titleEn" placeholder="e.g., Hajimi Singing Contest S2">
+      </div>
+      <div class="form-row">
+        <label>活动描述</label>
+        <textarea id="desc" rows="3" placeholder="简短介绍活动内容" required></textarea>
+      </div>
+      <div class="form-row">
+        <label>活动描述（English）</label>
+        <textarea id="descEn" rows="3" placeholder="Brief description in English"></textarea>
+      </div>
+      <div class="form-row">
+        <label>跳转链接</label>
+        <input type="url" id="link" placeholder="https://...">
+      </div>
+      <!-- 标签选择与时间 -->
+      <div class="form-row">
+        <label>标签</label>
+        <select id="status" required>
+          <option value="limited">限时</option>
+          <option value="permanent">常驻</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>开始时间</label>
+        <input type="datetime-local" id="start" required>
+      </div>
+      <div class="form-row" id="end-row">
+        <label>截止时间</label>
+        <input type="datetime-local" id="end">
+      </div>
+      <div class="form-actions">
+        <button id="submit-btn" type="submit" class="filter-chip chip-permanent">保存活动</button>
+        <a href="index.html" class="filter-chip chip-all" style="text-decoration:none;display:inline-block;">返回活动页</a>
+        <button type="button" id="export-btn" class="filter-chip chip-limited">导出JSON</button>
+        <label class="filter-chip chip-permanent" style="cursor:pointer;">导入JSON<input type="file" id="import-file" accept="application/json" style="display:none;"></label>
+      </div>
+    </form>
+
+    <section class="admin-list">
+      <h2>已上传的活动</h2>
+      <ul id="list"></ul>
+    </section>
+  </main>
+
+  <script>
+    // 将 File 转为 dataURL（中文注释）
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    // 本地存储读取/保存
+    function getUserEvents() {
+      try {
+        const raw = localStorage.getItem('user_events');
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (_) { return []; }
+    }
+    function saveUserEvents(arr) { localStorage.setItem('user_events', JSON.stringify(arr || [])); }
+
+    // 将 datetime-local 值转换为 YYYY/MM/DD HH:mm
+    function fmtDateTimeLocal(val) {
+      if (!val) return '';
+      // 形如 2025-11-18T12:34
+      const [date, time] = String(val).split('T');
+      const d = date.replace(/-/g, '/');
+      return time ? `${d} ${time}` : d;
+    }
+
+    function toLocalInputValue(val) {
+      if (!val) return '';
+      const m = String(val).match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})(?:\s+(\d{2}):(\d{2}))?$/);
+      if (!m) return '';
+      const [, y, mm, dd, hh='00', min='00'] = m;
+      return `${y}-${mm}-${dd}T${hh}:${min}`;
+    }
+
+    const form = document.getElementById('event-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusEl = document.getElementById('status');
+    const endRow = document.getElementById('end-row');
+    const imageEl = document.getElementById('image');
+    const preview = document.getElementById('preview');
+    const listEl = document.getElementById('list');
+    let currentImageDataURL = '';
+    let editingIndex = null;
+
+    // 状态切换：常驻不显示截止时间；限时/完结显示
+    function syncEndVisibility() {
+      const v = statusEl.value;
+      endRow.style.display = (v === 'permanent') ? 'none' : 'block';
+      document.getElementById('end').required = (v !== 'permanent');
+    }
+    statusEl.addEventListener('change', syncEndVisibility);
+    syncEndVisibility();
+
+    // 图片预览
+    imageEl.addEventListener('change', async () => {
+      const f = imageEl.files && imageEl.files[0];
+      if (!f) { currentImageDataURL = ''; preview.innerHTML = ''; return; }
+      currentImageDataURL = await fileToDataURL(f);
+      preview.innerHTML = `<img src="${currentImageDataURL}" alt="预览" style="max-width:280px;max-height:160px;border-radius:8px;object-fit:contain;background:#ddd;">`;
+    });
+
+    // 渲染列表
+    function renderList() {
+      const data = getUserEvents();
+      listEl.innerHTML = '';
+      data.forEach((e, idx) => {
+        const li = document.createElement('li');
+        li.style.margin = '8px 0';
+        li.textContent = `${e.title.zh} - ${e.status} - ${e.start}${e.end ? (' ~ ' + e.end) : ''}`;
+        const del = document.createElement('button');
+        del.textContent = '删除';
+        del.className = 'filter-chip chip-completed';
+        del.style.marginLeft = '12px';
+        del.onclick = () => {
+          const arr = getUserEvents();
+          arr.splice(idx, 1);
+          saveUserEvents(arr);
+          renderList();
+        };
+        const edit = document.createElement('button');
+        edit.textContent = '再编辑';
+        edit.className = 'filter-chip chip-limited';
+        edit.style.marginLeft = '12px';
+        edit.onclick = () => {
+          editingIndex = idx;
+          document.getElementById('title').value = e.title.zh || '';
+          document.getElementById('titleEn').value = e.title.en || '';
+          document.getElementById('desc').value = e.description.zh || '';
+          document.getElementById('descEn').value = e.description.en || '';
+          document.getElementById('link').value = e.url || '';
+          statusEl.value = e.status || 'limited';
+          syncEndVisibility();
+          document.getElementById('start').value = toLocalInputValue(e.start);
+          document.getElementById('end').value = toLocalInputValue(e.end);
+          // 编辑模式下：文件输入不强制，清空当前选择，使用已保存图片并立即预览
+          imageEl.required = false;
+          imageEl.value = '';
+          currentImageDataURL = e.image || '';
+          preview.innerHTML = currentImageDataURL ? `<img src="${currentImageDataURL}" alt="预览" style="max-width:280px;max-height:160px;border-radius:8px;object-fit:contain;background:#ddd;">` : '';
+          submitBtn.textContent = '更新活动';
+        };
+        li.appendChild(del);
+        li.appendChild(edit);
+        listEl.appendChild(li);
+      });
+    }
+    renderList();
+    document.querySelectorAll('.form-actions .filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.add('feedback');
+        setTimeout(() => { btn.classList.remove('feedback'); }, 400);
+      });
+    });
+
+    // 表单提交
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const titleEn = document.getElementById('titleEn').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      const descEn = document.getElementById('descEn').value.trim();
+      const link = document.getElementById('link').value.trim();
+      const status = statusEl.value;
+      const start = fmtDateTimeLocal(document.getElementById('start').value);
+      const end = fmtDateTimeLocal(document.getElementById('end').value);
+      if (!currentImageDataURL) { alert('请上传图片'); return; }
+      const item = {
+        title: { zh: title, en: titleEn || title },
+        description: { zh: desc, en: descEn || desc },
+        image: currentImageDataURL,
+        url: link || '#',
+        start: start,
+        end: (status === 'permanent') ? '' : end,
+        status: status
+      };
+      const arr = getUserEvents();
+      if (editingIndex !== null) { arr[editingIndex] = item; }
+      else { arr.push(item); }
+      saveUserEvents(arr);
+      renderList();
+      form.reset();
+      currentImageDataURL = '';
+      editingIndex = null;
+      preview.innerHTML = '';
+      syncEndVisibility();
+      // 保存后恢复创建模式约束：重新要求选择文件
+      imageEl.required = true;
+      imageEl.value = '';
+      submitBtn.textContent = '保存活动';
+      alert('已保存活动');
+    });
+
+    // 导出 JSON（下载为 events.json）
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const data = getUserEvents();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'events.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // 导入 JSON（覆盖本地 user_events）
+    document.getElementById('import-file').addEventListener('change', async (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const text = await f.text();
+      try {
+        const arr = JSON.parse(text);
+        if (!Array.isArray(arr)) throw new Error('格式错误');
+        saveUserEvents(arr);
+        renderList();
+        alert('已导入JSON并保存');
+      } catch (err) {
+        alert('JSON格式不正确');
+      } finally {
+        e.target.value = '';
+      }
+    });
+  </script>
+</body>
+</html>

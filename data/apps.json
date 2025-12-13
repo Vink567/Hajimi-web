@@ -1,0 +1,75 @@
+{
+  "apps": [
+    {
+      "id": "hajimi_emoji",
+      "title_key": "nav_emoji",
+      "path": "/external_web/hajimi_emoji/emoji.html",
+      "type": "app",
+      "icon": "fas fa-smile",
+      "preload": true
+    },
+    {
+      "id": "hajimi_beneficence",
+      "title_key": "nav_charity",
+      "path": "/external_web/hajimi_beneficence/index.html",
+      "type": "app",
+      "icon": "fas fa-heart",
+      "preload": false
+    },
+    {
+      "id": "hajimi_events",
+      "title_key": "nav_activity",
+      "path": "/external_web/hajimi_events/events.html",
+      "type": "app",
+      "icon": "fas fa-calendar",
+      "preload": false
+    },
+    {
+      "id": "hajimi_music",
+      "title_key": "create_btn",
+      "path": "/external_web/hajimi_music/music.html",
+      "type": "app",
+      "icon": "fas fa-music",
+      "preload": true
+    }
+  ],
+  "links": [
+    {
+      "id": "culture_theta",
+      "title_key": "nav_culture",
+      "url": "https://hajimi-theta.vercel.app/",
+      "type": "link",
+      "target": "_blank"
+    }
+  ],
+  "menu_structure": [
+    { "key": "nav_overview", "href": "#overview" },
+    { "key": "nav_history", "href": "#history" },
+    { "link_id": "culture_theta" },
+    { 
+      "key": "nav_ecosystem", 
+      "href": "#ecosystem",
+      "submenu": [
+        { "key": "nav_concert", "action": "showPopup" },
+        { "app_id": "hajimi_emoji" }
+      ]
+    },
+    { 
+      "key": "nav_foundation", 
+      "href": "#foundation",
+      "submenu": [
+        { "app_id": "hajimi_beneficence" },
+        { "app_id": "hajimi_events" }
+      ]
+    },
+    {
+      "key": "nav_community", 
+      "href": "#community",
+      "submenu": [
+        { "title": "Twitter", "url": "https://x.com/hajimi_CTO_BNB", "target": "_blank" },
+        { "title": "TG", "url": "https://t.me/BNB_Hajimiiii", "target": "_blank" },
+        { "title": "tiktok", "url": "https://www.tiktok.com/@hajimi_bnb", "target": "_blank" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>慈善项目后台管理</title>
+    <style>
+        /* 复用 hajimi_events/styles.css 的后台管理样式 */
+        :root { --bg: #f9f9f9; --fg: #333; --card-bg: #fff; --border: #e5e7eb; --primary: #ff9a9e; --shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; background: var(--bg); color: var(--fg); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 15px; box-shadow: var(--shadow); }
+        
+        h1 { margin-top: 0; color: var(--primary); text-align: center; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+
+        .admin-form { display: grid; gap: 20px; }
+        .form-row { display: grid; gap: 8px; }
+        .form-row label { font-weight: bold; color: #555; }
+        
+        input[type="text"], input[type="url"], input[type="date"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+
+        .preview { margin-top: 10px; min-height: 50px; border: 2px dashed #eee; display: flex; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; }
+        .preview img { max-width: 100%; max-height: 200px; object-fit: cover; }
+
+        .form-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+        
+        button, .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+            transition: opacity 0.3s;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .btn:hover { opacity: 0.9; }
+
+        .btn-primary { background: var(--primary); }
+        .btn-secondary { background: #6c757d; }
+        .btn-success { background: #51cf66; }
+        .btn-danger { background: #ff6b6b; }
+        .btn-warning { background: #fcc419; color: #333; }
+
+        .project-list { list-style: none; padding: 0; margin-top: 40px; }
+        .project-item { background: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+        .project-info { flex: 1; }
+        .project-title { font-weight: bold; font-size: 1.1rem; display: block; }
+        .project-meta { font-size: 0.9rem; color: #777; margin-top: 5px; }
+        .project-status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; color: #fff; margin-right: 5px; }
+        .status-ongoing { background: #51cf66; }
+        .status-completed { background: #ff6b6b; }
+        .status-preparation { background: #fcc419; }
+
+        .item-actions { display: flex; gap: 5px; }
+        .item-actions button { padding: 5px 10px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>慈善项目后台管理</h1>
+    <p class="subtitle">管理慈善页面展示的项目内容</p>
+
+    <form id="project-form" class="admin-form">
+        <input type="hidden" id="edit-index" value="-1">
+
+        <div class="form-row">
+            <label>项目图片</label>
+            <input type="file" id="image-input" accept="image/*">
+            <div class="preview" id="image-preview">
+                <span style="color:#999;font-size:0.9rem;">图片预览区域</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>项目标题 (中文)</label>
+            <input type="text" id="title" placeholder="例如：流浪猫暖冬计划" required>
+        </div>
+
+        <div class="form-row">
+            <label>项目标题 (English)</label>
+            <input type="text" id="title-en" placeholder="e.g., Stray Cat Winter Warmth Plan" required>
+        </div>
+
+        <div class="form-row">
+            <label>项目描述 (中文)</label>
+            <textarea id="desc" rows="4" placeholder="简要描述项目内容..." required></textarea>
+        </div>
+
+        <div class="form-row">
+            <label>项目描述 (English)</label>
+            <textarea id="desc-en" rows="4" placeholder="Brief description of the project..." required></textarea>
+        </div>
+
+        <div class="form-row">
+            <label>活动类型</label>
+            <select id="activity-type" required>
+                <option value="limited-time">限时活动</option>
+                <option value="long-term">长期活动</option>
+            </select>
+        </div>
+
+        <div class="form-row" style="grid-template-columns: 1fr 1fr; display: grid; gap: 20px;">
+            <div>
+                <label>开始日期</label>
+                <input type="date" id="start-date" required>
+            </div>
+            <div id="end-date-container">
+                <label>结束日期</label>
+                <input type="date" id="end-date">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>详情链接</label>
+            <input type="url" id="link" placeholder="请输入详情页链接" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary" id="save-btn">保存项目</button>
+            <button type="button" class="btn-secondary" id="cancel-btn" style="display:none;">取消编辑</button>
+            <a href="index.html" class="btn btn-warning">返回慈善页面</a>
+        </div>
+        
+        <div class="form-actions" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:20px; width:100%;">
+            <button type="button" class="btn-success" id="export-btn">导出 JSON</button>
+            <label class="btn btn-primary" style="cursor:pointer; margin:0;">
+                导入 JSON <input type="file" id="import-file" accept="application/json" style="display:none;">
+            </label>
+            <button type="button" class="btn-danger" id="reset-default-btn" title="恢复默认的3个项目">重置为默认数据</button>
+        </div>
+    </form>
+
+    <div class="project-list-container">
+        <h2 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 40px;">已发布项目</h2>
+        <ul id="project-list" class="project-list">
+            <!-- 列表项将通过 JS 渲染 -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'hajimi_charity_projects';
+    const form = document.getElementById('project-form');
+    const imageInput = document.getElementById('image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const listContainer = document.getElementById('project-list');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const editIndexInput = document.getElementById('edit-index');
+
+    const activityTypeSelect = document.getElementById('activity-type');
+    const endDateContainer = document.getElementById('end-date-container');
+    const endDateInput = document.getElementById('end-date');
+
+    let currentImageData = '';
+
+    // 默认数据
+    const DEFAULT_PROJECTS = [
+        {
+            title: "流浪猫暖冬计划",
+            title_en: "Stray Cat Winter Warmth Plan",
+            desc: "为城市流浪猫提供过冬猫窝和食物，让它们在寒冷的冬天也能感受到温暖。",
+            desc_en: "Provide winter shelters and food for urban stray cats, allowing them to feel warmth in the cold winter.",
+            image: "images/1.png",
+            type: "limited-time",
+            startDate: "2024-11-01",
+            endDate: "2025-02-28",
+            link: "detail.html"
+        },
+        {
+            title: "社区绿色家园",
+            title_en: "Community Green Home",
+            desc: "组织社区志愿者进行环境清理和绿化种植，共同打造美好生活环境。",
+            desc_en: "Organize community volunteers for environmental cleanup and green planting to create a beautiful living environment together.",
+            image: "/images/mao2.png",
+            type: "limited-time",
+            startDate: "2024-05-01",
+            endDate: "2024-06-01",
+            link: "detail.html"
+        },
+        {
+            title: "偏远地区爱心助学",
+            title_en: "Remote Area Education Aid",
+            desc: "为偏远地区的孩子们筹集图书和文具，用知识点亮他们的未来。",
+            desc_en: "Collect books and stationery for children in remote areas, illuminating their future with knowledge.",
+            image: "/images/map3.png",
+            type: "long-term",
+            startDate: "2025-03-01",
+            endDate: "",
+            link: "detail.html"
+        }
+    ];
+
+    // 监听活动类型变化
+    activityTypeSelect.addEventListener('change', function() {
+        if (this.value === 'long-term') {
+            endDateContainer.style.display = 'none';
+            endDateInput.value = ''; 
+            endDateInput.required = false;
+        } else {
+            endDateContainer.style.display = 'block';
+            endDateInput.required = true;
+        }
+    });
+
+    // 初始化：如果 Storage 为空，写入默认数据
+    function initData() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (!data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PROJECTS));
+        }
+    }
+
+    function getProjects() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+
+    function saveProjects(projects) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        renderList();
+    }
+
+    // 计算状态
+    function calculateStatus(project) {
+        const now = new Date();
+        const start = new Date(project.startDate);
+        
+        if (project.type === 'long-term') {
+            if (project.startDate && start > now) {
+                return 'preparation';
+            }
+            return 'ongoing';
+        }
+        
+        const end = new Date(project.endDate);
+        end.setHours(23, 59, 59, 999);
+        
+        if (now < start) return 'preparation';
+        if (now > end) return 'completed';
+        return 'ongoing';
+    }
+
+    // 图片转 Base64
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentImageData = e.target.result;
+            imagePreview.innerHTML = `<img src="${currentImageData}">`;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // 渲染列表
+    function renderList() {
+        const projects = getProjects();
+        listContainer.innerHTML = '';
+        
+        projects.forEach((p, index) => {
+            if (!p.type) p.type = 'limited-time'; // 兼容旧数据
+            
+            const status = calculateStatus(p);
+            const li = document.createElement('li');
+            li.className = 'project-item';
+            
+            const statusLabels = {
+                'ongoing': '进行中',
+                'completed': '已结束',
+                'preparation': '筹备中'
+            };
+            
+            // 构建日期显示
+            let dateDisplay = p.startDate.replace(/-/g, '.');
+            if (p.type === 'long-term') {
+                dateDisplay += ' (长期)';
+            } else {
+                dateDisplay += ' - ' + (p.endDate ? p.endDate.replace(/-/g, '.') : '?');
+            }
+
+            // 检查是否有英文内容
+            const hasEn = p.title_en && p.title_en.trim() !== '';
+            const enBadge = hasEn ? '<span style="background:#e3f2fd; color:#1976d2; padding:2px 6px; border-radius:4px; font-size:0.8rem; margin-left:5px; border:1px solid #bbdefb;">EN Available</span>' : '<span style="background:#fff3e0; color:#ef6c00; padding:2px 6px; border-radius:4px; font-size:0.8rem; margin-left:5px; border:1px solid #ffe0b2;">No EN</span>';
+
+            li.innerHTML = `
+                <div style="width: 80px; height: 60px; flex-shrink: 0; background: #eee; border-radius: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <img src="${p.image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjNlbSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzU1NSI+SW1hZ2U8L3RleHQ+PC9zdmc+'">
+                </div>
+                <div class="project-info">
+                    <span class="project-title">${p.title} ${enBadge}</span>
+                    <div class="project-meta">
+                        <span class="project-status status-${status}">${statusLabels[status]}</span>
+                        <span style="margin-left:5px; background:#eee; padding:2px 6px; border-radius:4px; font-size:0.8rem;">${p.type === 'long-term' ? '长期活动' : '限时活动'}</span>
+                        <span><i class="far fa-clock"></i> ${dateDisplay}</span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn-primary" onclick="editProject(${index})">编辑</button>
+                    <button class="btn-danger" onclick="deleteProject(${index})">删除</button>
+                </div>
+            `;
+            listContainer.appendChild(li);
+        });
+    }
+
+    // 编辑项目
+    window.editProject = function(index) {
+        const projects = getProjects();
+        const p = projects[index];
+        if (!p.type) p.type = 'limited-time';
+        
+        document.getElementById('title').value = p.title;
+        document.getElementById('title-en').value = p.title_en || '';
+        document.getElementById('desc').value = p.desc;
+        document.getElementById('desc-en').value = p.desc_en || '';
+        document.getElementById('activity-type').value = p.type;
+        document.getElementById('start-date').value = p.startDate;
+        document.getElementById('end-date').value = p.endDate || '';
+        document.getElementById('link').value = p.link || '';
+        
+        // 触发change事件以更新UI
+        activityTypeSelect.dispatchEvent(new Event('change'));
+        
+        currentImageData = p.image;
+        imagePreview.innerHTML = `<img src="${currentImageData}">`;
+        
+        editIndexInput.value = index;
+        saveBtn.textContent = '更新项目';
+        cancelBtn.style.display = 'inline-block';
+        
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // 删除项目
+    window.deleteProject = function(index) {
+        if (!confirm('确定要删除这个项目吗？')) return;
+        const projects = getProjects();
+        projects.splice(index, 1);
+        saveProjects(projects);
+    };
+
+    // 取消编辑
+    cancelBtn.addEventListener('click', function() {
+        form.reset();
+        editIndexInput.value = '-1';
+        currentImageData = '';
+        imagePreview.innerHTML = '<span style="color:#999;font-size:0.9rem;">图片预览区域</span>';
+        saveBtn.textContent = '保存项目';
+        cancelBtn.style.display = 'none';
+        activityTypeSelect.dispatchEvent(new Event('change'));
+    });
+
+    // 提交表单
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('title').value;
+        const titleEn = document.getElementById('title-en').value;
+        const desc = document.getElementById('desc').value;
+        const descEn = document.getElementById('desc-en').value;
+        const type = document.getElementById('activity-type').value;
+        const startDate = document.getElementById('start-date').value;
+        let endDate = document.getElementById('end-date').value;
+        const link = document.getElementById('link').value;
+        
+        if (!currentImageData) {
+            alert('请上传或保留项目图片');
+            return;
+        }
+
+        if (link === '#' || !link.trim()) {
+            alert('详情链接不能为 # 或空');
+            return;
+        }
+        
+        if (type === 'long-term') {
+            endDate = '';
+        } else {
+            if (!endDate) {
+                alert('限时活动必须填写结束日期');
+                return;
+            }
+        }
+
+        const project = {
+            title,
+            title_en: titleEn,
+            desc,
+            desc_en: descEn,
+            image: currentImageData,
+            type,
+            startDate,
+            endDate,
+            link
+        };
+
+        const projects = getProjects();
+        const index = parseInt(editIndexInput.value);
+
+        if (index >= 0) {
+            projects[index] = project;
+            alert('项目已更新');
+        } else {
+            projects.push(project);
+            alert('项目已创建');
+        }
+
+        saveProjects(projects);
+        cancelBtn.click(); // 重置表单
+    });
+
+    // 导出 JSON
+    document.getElementById('export-btn').addEventListener('click', () => {
+        const data = getProjects();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'charity_projects.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    // 导入 JSON
+    document.getElementById('import-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const projects = JSON.parse(e.target.result);
+                if (Array.isArray(projects)) {
+                    saveProjects(projects);
+                    alert('导入成功！');
+                } else {
+                    alert('无效的 JSON 格式');
+                }
+            } catch (err) {
+                alert('解析 JSON 失败');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // Reset input
+    });
+
+    // 重置为默认数据
+    document.getElementById('reset-default-btn').addEventListener('click', function() {
+        if(confirm('确定要重置所有数据为初始状态吗？这将覆盖当前的更改。')) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PROJECTS));
+            renderList();
+            alert('已重置');
+        }
+    });
+
+    // 初始化
+    initData();
+    // 触发初始UI状态
+    if(activityTypeSelect) activityTypeSelect.dispatchEvent(new Event('change'));
+    renderList();
+</script>
+
+</body>
+</html>

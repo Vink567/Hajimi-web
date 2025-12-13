@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hajimi NFT</title>
+    
+    <!-- 引入主站样式 (复用导航栏和基础样式) -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/toast.css">
+    
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 本页专属样式 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="top"></div>
+
+    <!-- Loading Screen (Aligned with Main Site) -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <img src="/images/loading.png" alt="Loading..." class="loader-logo">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0%</div>
+            <div class="loader-subtext">（首次加载可能需要更长时间）</div>
+        </div>
+    </div>
+    <script>
+        // 检查是否有缓存记录，如果有则直接隐藏加载页
+        (function() {
+            if (localStorage.getItem('hajimi_emoji_visited')) {
+                var loader = document.getElementById('loading-screen');
+                if (loader) loader.style.display = 'none';
+            }
+        })();
+    </script>
+
+    <!-- 顶部导航栏 (标准化结构) -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <!-- 左侧区域：Logo -->
+            <a href="/" class="logo">
+                <img src="/images/logo.png" alt="HAJIMI">
+            </a>
+
+            <!-- 中间区域：导航链接 -->
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link" data-i18n="nav_home">首页</a></li>
+                <li><a href="https://hajimi-theta.vercel.app/" target="_blank" class="nav-link" data-i18n="nav_culture">哈基米文化</a></li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_ecosystem">哈基米生态</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="#" onclick="showPopup(event)" data-i18n="nav_concert">音乐会</a></li>
+                        <li><a href="/external_web/hajimi_emoji/emoji.html" data-i18n="nav_emoji">头像</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_foundation">基金会</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="/external_web/hajimi_beneficence/index.html" data-i18n="nav_charity">慈善</a></li>
+                        <li><a href="/external_web/hajimi_events/events.html" data-i18n="nav_activity">活动</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_community">社区</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="https://x.com/hajimi_CTO_BNB" target="_blank">Twitter</a></li>
+                        <li><a href="https://t.me/BNB_Hajimiiii" target="_blank">TG</a></li>
+                        <li><a href="https://www.tiktok.com/@hajimi_bnb" target="_blank">tiktok</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 右侧区域：语言切换 -->
+            <div class="nav-right">
+                <div class="lang-switch" id="lang-switch">
+                    <span class="current-lang">中文</span>
+                    <i class="fas fa-caret-down"></i>
+                    <ul class="lang-dropdown">
+                        <li data-lang="zh">中文</li>
+                        <li data-lang="en">English</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 汉堡菜单按钮 -->
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+
+        </div>
+    </nav>
+    
+    <!-- 背景装饰 (bg3_1) -->
+    <img src="/images/bg3_1.png" class="bg3-1-decoration" alt="Background Decoration">
+
+    <main>
+        <!-- NFT 展示网格区域 -->
+        <section class="nft-gallery" id="nft-gallery">
+            <!-- 动态生成内容 -->
+        </section>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container" id="pagination">
+            <!-- 动态生成分页 -->
+        </div>
+    </main>
+
+    <!-- 简单页脚 -->
+    <footer class="simple-footer">
+        <p>© 2025 by Hajimi Community . All rights reserved!</p>
+    </footer>
+
+    <!-- 复用导航栏逻辑 -->
+    <script src="emoji-nav.js"></script>
+
+    <script>
+        // --- 全局变量 ---
+        let allImages = [];
+        const itemsPerPage = 30;
+        let currentPage = 1;
+        const preloadedImages = new Set(); // 记录已预加载的图片
+
+        // --- 多语言配置 ---
+        const pageTranslations = {
+            'zh': {
+                'nav_home': '首页',
+                'nav_ecosystem': '哈基米生态',
+                'nav_culture': '哈基米文化',
+                'nav_concert': '音乐会',
+                'nav_emoji': '头像',
+                'nav_foundation': '基金会',
+                'nav_charity': '慈善',
+                'nav_activity': '活动',
+                'nav_community': '社区',
+                'notice_text': '哈基米头像均有社区原创，欢迎大家下载使用。',
+                'prev_page': '上一页',
+                'next_page': '下一页'
+            },
+            'en': {
+                'nav_home': 'Home',
+                'nav_ecosystem': 'Hajimi Ecosystem',
+                'nav_culture': 'Culture',
+                'nav_concert': 'Concert',
+                'nav_emoji': 'Avatar',
+                'nav_foundation': 'Foundation',
+                'nav_charity': 'Charity',
+                'nav_activity': 'Activity',
+                'nav_community': 'Community',
+                'notice_text': 'Hajimi avatars are all original creations by the community, feel free to download and use.',
+                'prev_page': 'Prev',
+                'next_page': 'Next'
+            }
+        };
+
+        let currentLang = localStorage.getItem('hajimi_lang') || 'zh';
+
+        // 设置语言函数
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('hajimi_lang', lang);
+            updatePageContent();
+            renderPagination(); // 更新分页按钮语言
+        }
+        window.setPageLanguage = setLanguage;
+
+        // 获取翻译文本辅助函数
+        function getTrans(key) {
+            if (!pageTranslations[currentLang]) return key;
+            return pageTranslations[currentLang][key] || pageTranslations['zh'][key] || key;
+        }
+
+        // 更新页面内容
+        function updatePageContent() {
+            // 更新静态文本
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const text = getTrans(key);
+                if (text) {
+                    element.innerText = text;
+                }
+            });
+
+            // 更新 html lang 属性
+            document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+        }
+
+        // --- 图库逻辑 ---
+
+        async function initGallery() {
+            try {
+                const response = await fetch('nft-images.json');
+                if (!response.ok) throw new Error('Failed to load image list');
+                allImages = await response.json();
+                
+                // 1. 渲染第一页
+                renderGallery(currentPage);
+                renderPagination();
+
+                // 2. 检查缓存逻辑
+                const hasVisited = localStorage.getItem('hajimi_emoji_visited');
+
+                if (!hasVisited) {
+                    // 如果没有缓存，则等待图片加载，然后设置缓存
+                    await waitForImagesLoading();
+                    hideLoadingScreen();
+                    localStorage.setItem('hajimi_emoji_visited', 'true');
+                } else {
+                    // 如果有缓存，直接隐藏（虽然 Early Script 已经隐藏了，这里做个兜底）
+                    hideLoadingScreen();
+                }
+
+                // 3. 开始预加载后两页
+                preloadNextPages();
+
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                // 出错也要隐藏 Loading，避免卡死
+                hideLoadingScreen();
+                document.getElementById('nft-gallery').innerHTML = '<p style="text-align:center;width:100%;">加载图片失败 / Failed to load images</p>';
+            }
+        }
+
+        // 等待当前页面的图片加载
+        function waitForImagesLoading() {
+            return new Promise((resolve) => {
+                const gallery = document.getElementById('nft-gallery');
+                const images = gallery.querySelectorAll('img');
+                const total = images.length;
+                
+                if (total === 0) {
+                    updateLoadingProgress(100);
+                    resolve();
+                    return;
+                }
+
+                let loadedCount = 0;
+                
+                // 更新进度的辅助函数
+                const update = () => {
+                    loadedCount++;
+                    const percent = Math.floor((loadedCount / total) * 100);
+                    updateLoadingProgress(percent);
+                    
+                    if (loadedCount >= total) {
+                        resolve();
+                    }
+                };
+
+                // 立即检查一次状态
+                let pending = 0;
+                images.forEach(img => {
+                    if (img.complete && img.naturalHeight !== 0) {
+                        loadedCount++;
+                    } else {
+                        pending++;
+                        img.onload = update;
+                        img.onerror = update; // 即使加载失败也算完成，避免卡住
+                    }
+                });
+
+                // 如果全部都已经 loaded (cached)
+                if (pending === 0) {
+                    updateLoadingProgress(100);
+                    resolve();
+                } else {
+                    // 更新初始进度
+                    updateLoadingProgress(Math.floor((loadedCount / total) * 100));
+                }
+            });
+        }
+
+        function updateLoadingProgress(percent) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            if (progressBar) progressBar.style.width = percent + '%';
+            if (progressText) progressText.innerText = percent + '%';
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        function renderGallery(page) {
+            const gallery = document.getElementById('nft-gallery');
+            gallery.innerHTML = ''; // 清空当前内容
+            
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageImages = allImages.slice(start, end);
+
+            pageImages.forEach(imageName => {
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                
+                // 提取编号用于显示名称
+                let displayNum = '000';
+                const match = imageName.match(/unnamed-(\d+)/);
+                if (match) {
+                    displayNum = match[1].padStart(3, '0');
+                } else if (imageName === 'unnamed.jpg') {
+                    displayNum = '000';
+                }
+
+                const displayName = `Hajimi #${displayNum}`;
+                const imagePath = `images/NFT/${imageName}`;
+
+                card.innerHTML = `
+                    <div class="nft-image-box">
+                        <img src="${imagePath}" alt="${displayName}">
+                    </div>
+                    <div class="nft-info">
+                        <h3 class="nft-name">${displayName}</h3>
+                        <div class="action-buttons">
+                            <button class="copy-btn" onclick="copyNft(this)" aria-label="复制图片" title="复制图片">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button class="download-btn" onclick="downloadNft(this)" aria-label="下载图片" title="下载图片">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 16L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 12L12 16L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M4 20L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                gallery.appendChild(card);
+            });
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            const totalPages = Math.ceil(allImages.length / itemsPerPage);
+            if (totalPages <= 1) return;
+
+            // 上一页
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerText = getTrans('prev_page');
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => changePage(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            // 页码
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => changePage(i);
+                container.appendChild(btn);
+            }
+
+            // 下一页
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerText = getTrans('next_page');
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => changePage(currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+
+        function changePage(newPage) {
+            const totalPages = Math.ceil(allImages.length / itemsPerPage);
+            if (newPage < 1 || newPage > totalPages) return;
+            
+            currentPage = newPage;
+            renderGallery(currentPage);
+            renderPagination();
+            
+            // 切换页面后平滑滚动到展示区顶部
+            const galleryTop = document.getElementById('nft-gallery').offsetTop;
+            window.scrollTo({ top: galleryTop - 100, behavior: 'smooth' });
+
+            // 预加载后两页
+            preloadNextPages();
+        }
+
+        function preloadNextPages() {
+            // 预加载当前页的后两页
+            const totalPages = Math.ceil(allImages.length / itemsPerPage);
+            
+            for (let i = 1; i <= 2; i++) {
+                const targetPage = currentPage + i;
+                if (targetPage <= totalPages) {
+                    preloadPageImages(targetPage);
+                }
+            }
+        }
+
+        function preloadPageImages(page) {
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageImages = allImages.slice(start, end);
+            
+            pageImages.forEach(imageName => {
+                if (!preloadedImages.has(imageName)) {
+                    const img = new Image();
+                    img.src = `images/NFT/${imageName}`;
+                    preloadedImages.add(imageName);
+                }
+            });
+        }
+
+        // 初始化
+        updatePageContent();
+        initGallery();
+
+        /**
+         * 下载 NFT 图片
+         */
+        function downloadNft(btn) {
+            const card = btn.closest('.nft-card');
+            if (!card) return;
+
+            const img = card.querySelector('.nft-image-box img');
+            const name = card.querySelector('.nft-name').textContent.trim();
+            
+            if (img && confirm('是否确认下载图片：' + name + '？')) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = name + '.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        /**
+         * 复制 NFT 图片
+         */
+        async function copyNft(btn) {
+            const card = btn.closest('.nft-card');
+            if (!card) return;
+
+            const img = card.querySelector('.nft-image-box img');
+            if (!img) return;
+            
+            try {
+                const response = await fetch(img.src);
+                const blob = await response.blob();
+
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [blob.type]: blob
+                        })
+                    ]);
+                } catch (writeError) {
+                    console.warn('Direct clipboard write failed, attempting conversion...', writeError);
+                    
+                    const imageBitmap = await createImageBitmap(blob);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = imageBitmap.width;
+                    canvas.height = imageBitmap.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(imageBitmap, 0, 0);
+                    
+                    const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            'image/png': pngBlob
+                        })
+                    ]);
+                }
+
+                const successMsg = currentLang === 'zh' ? '复制成功！' : 'Copied successfully!';
+                if (window.showToast) {
+                    window.showToast(successMsg);
+                } else {
+                    alert(successMsg);
+                }
+
+            } catch (err) {
+                console.error('Copy failed:', err);
+                const failMsg = currentLang === 'zh' ? '复制失败，请手动保存' : 'Copy failed, please save manually';
+                if (window.showToast) {
+                    window.showToast(failMsg);
+                } else {
+                    alert(failMsg);
+                }
+            }
+        }
+    </script>
+    </main>
+</body>
+</html>

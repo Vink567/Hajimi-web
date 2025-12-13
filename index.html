@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hajimi Web</title>
+    <link rel="icon" href="/images/webc.png" type="image/png">
+    <!-- 引入 CSS -->
+    <link rel="stylesheet" href="/css/style.css?v=20251211_35">
+    <link rel="stylesheet" href="/css/toast.css?v=20251211_30">
+    <link rel="stylesheet" href="/css/buy-sidebar.css?v=20251211_30">
+    <!-- 引入 Font Awesome 用于图标 (可选，这里用于汉堡菜单图标) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- 加载页面 -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <img src="/images/loading.png" alt="Loading..." class="loader-logo">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0%</div>
+            <div class="loader-subtext">（首次加载可能需要更长时间）</div>
+        </div>
+    </div>
+    <script>
+        // 检查是否有缓存记录，如果有则直接隐藏加载页
+        (function() {
+            if (localStorage.getItem('hasVisited')) {
+                var loader = document.getElementById('loading-screen');
+                if (loader) loader.style.display = 'none';
+            }
+        })();
+
+        // 时间轴图标拖拽逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const coins = document.querySelectorAll('.timeline-coin');
+            const line = document.querySelector('.timeline-line'); // 获取时间轴线条
+
+            coins.forEach(coin => {
+                let isDragging = false;
+                let startY;
+                let startTransformY = 0;
+                let minTranslateY, maxTranslateY; // 移动范围限制
+
+                // 获取父元素 .timeline-row
+                const row = coin.closest('.timeline-row');
+                
+                // 初始化 transformY
+                // 检查当前是否有 transform 属性
+                const style = window.getComputedStyle(row);
+                const matrix = new WebKitCSSMatrix(style.transform);
+                startTransformY = matrix.m42;
+
+                coin.addEventListener('mousedown', function(e) {
+                    isDragging = true;
+                    startY = e.clientY;
+                    
+                    // 获取当前的 transform Y 值
+                    const currentStyle = window.getComputedStyle(row);
+                    const currentMatrix = new WebKitCSSMatrix(currentStyle.transform);
+                    startTransformY = currentMatrix.m42;
+                    
+                    // --- 计算移动限制 (碰撞检测 & 边界检查) ---
+                    const lineRect = line.getBoundingClientRect();
+                    const coinRect = coin.getBoundingClientRect();
+                    
+                    // 获取所有图标并按当前屏幕位置排序
+                    const allCoins = Array.from(document.querySelectorAll('.timeline-coin'));
+                    allCoins.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+                    
+                    const currentIndex = allCoins.indexOf(coin);
+                    const prevCoin = allCoins[currentIndex - 1];
+                    const nextCoin = allCoins[currentIndex + 1];
+                    
+                    // 计算上边界限制
+                    // 如果有上一个图标，限制为上一个图标的底部；否则为线条的顶部
+                    const limitTop = prevCoin ? prevCoin.getBoundingClientRect().bottom : lineRect.top;
+                    
+                    // 计算下边界限制
+                    // 如果有下一个图标，限制为下一个图标的顶部；否则为线条的底部
+                    const limitBottom = nextCoin ? nextCoin.getBoundingClientRect().top : lineRect.bottom;
+                    
+                    // 计算允许的 transform 范围
+                    // 向上最大距离 = 当前顶部 - 上边界
+                    // 向下最大距离 = 下边界 - 当前底部
+                    
+                    minTranslateY = startTransformY - (coinRect.top - limitTop);
+                    maxTranslateY = startTransformY + (limitBottom - coinRect.bottom);
+                    // ---------------------------------------
+                    
+                    // 添加临时事件监听器到 document，防止鼠标移出元素导致拖拽失效
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                    
+                    // 防止默认拖拽行为（如图片拖拽）
+                    e.preventDefault();
+                });
+                
+                function onMouseMove(e) {
+                    if (!isDragging) return;
+                    
+                    const dy = e.clientY - startY;
+                    let newY = startTransformY + dy;
+                    
+                    // 应用移动限制
+                    if (newY < minTranslateY) newY = minTranslateY;
+                    if (newY > maxTranslateY) newY = maxTranslateY;
+                    
+                    // 应用新的 transform，仅在 Y 轴移动
+                    row.style.transform = `translateY(${newY}px)`;
+                }
+                
+                function onMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+            });
+        });
+    </script>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <!-- 左侧区域：Logo -->
+            <a href="/" class="logo">
+                <img src="/images/logo.png" alt="HAJIMI">
+            </a>
+
+            <!-- 中间区域：导航链接 -->
+            <ul class="nav-menu">
+                <li><a href="#overview" class="nav-link" data-i18n="nav_overview">概览</a></li>
+                <li><a href="#history" class="nav-link" data-i18n="nav_history">发展历程</a></li>
+                <li class="has-submenu">
+                    <a href="#ecosystem" class="nav-link"><span data-i18n="nav_ecosystem">哈基米生态</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="https://hajimi-theta.vercel.app/" target="_blank" data-i18n="nav_culture">文化</a></li>
+                        <li><a href="#" onclick="showPopup(event)" data-i18n="nav_concert">音乐会</a></li>
+                        <li><a href="/external_web/hajimi_emoji/emoji.html" data-i18n="nav_emoji">头像</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#foundation" class="nav-link"><span data-i18n="nav_foundation">基金会</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="/external_web/hajimi_beneficence/index.html" data-i18n="nav_charity">慈善</a></li>
+                        <li><a href="/external_web/hajimi_events/events.html" data-i18n="nav_activity">活动</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#community" class="nav-link"><span data-i18n="nav_community">社区</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="https://x.com/hajimi_CTO_BNB" target="_blank">Twitter</a></li>
+                        <li><a href="https://t.me/BNB_Hajimiiii" target="_blank">TG</a></li>
+                        <li><a href="https://www.tiktok.com/@hajimi_bnb" target="_blank">tiktok</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 右侧区域：语言切换 -->
+            <div class="nav-right">
+                <div class="lang-switch" id="lang-switch">
+                    <span class="current-lang">中文</span>
+                    <i class="fas fa-caret-down"></i>
+                    <ul class="lang-dropdown">
+                        <li data-lang="zh">中文</li>
+                        <li data-lang="en">English</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 汉堡菜单按钮 -->
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 示例内容模块 (用于展示背景效果) -->
+    <section class="module module-1" id="overview">
+        <!-- 背景图改为 img 标签，实现高度自适应 -->
+        <img src="/images/banner.png" class="module-1-bg" alt="banner">
+  
+        <!-- 使用 img 标签引入草地图片，确保显示和位置正确 -->
+        <img src="/images/grass.png" class="grass-decoration" alt="grass decoration">
+    </section>
+
+    <section class="module module-2">
+        <div class="content">
+            <!-- 替换原来的内容，使用新的结构 -->
+        </div>
+        <!-- 添加猫爪装饰，放在 bg2 之上 -->
+        <img src="/images/猫爪.png" class="cat-paw-decoration" alt="cat paw">
+        
+        <!-- 关于部分的内容容器 -->
+        <div class="about-container">
+            <div class="about-header">
+                <img src="/images/a_left.png" class="about-deco" alt="left decoration">
+                <h2 class="about-title" data-i18n="about_title">关于</h2>
+                <img src="/images/a_right.png" class="about-deco" alt="right decoration">
+            </div>
+            <p class="about-text" data-i18n="about_text_1">全网超千亿播放量和无数二创音乐视频的哈基米</p>
+            <p class="about-text" data-i18n="about_text_2">沉浸于哈基米，一个充满梗和音乐的meme世界</p>
+            <p class="about-text" data-i18n="about_text_3">一句歌词到一只猫咪再到所有猫咪和所有事物的演变就是哈基米文化</p>
+            
+            <!-- 底部按钮 -->
+            <a href="/external_web/hajimi_music/music.html" class="create-btn">
+                <span data-i18n="create_btn">创作属于你自己的哈基米音乐</span>
+                <img src="/images/小猫爪.png" alt="icon">
+            </a>
+        </div>
+    </section>
+
+    <section class="module module-3">
+        <!-- 顶部添加 fenge 图片装饰 -->
+        <img src="/images/fenge.png" class="fenge-decoration" alt="decoration">
+        
+        <!-- 添加 bg3_1.png 装饰铺满 -->
+        <img src="/images/bg3_1.png" class="bg3-1-decoration" alt="bg3_1 decoration">
+
+        <!-- 合约地址和CA Bar 包装容器 -->
+        <div class="contract-wrapper">
+            <!-- 合约地址部分 -->
+            <div class="contract-container">
+                <div class="contract-header">
+                    <img src="/images/p_left.svg" class="contract-deco" alt="left decoration">
+                    <span class="contract-title" data-i18n="contract_title">合约地址</span>
+                    <img src="/images/p_right.svg" class="contract-deco" alt="right decoration">
+                </div>
+                <div class="contract-subtitle" data-i18n="contract_subtitle">（唯一）</div>
+            </div>
+
+            <!-- CA Bar (复制地址) -->
+            <div class="ca-bar-container" id="ca-bar" data-copy-value="0x82ec31d69b3c289e541b50e30681fd1acad24444">
+                <span class="ca-text">ca: 0x82ec31d69b3c289e541b50e30681fd1acad24444</span>
+            </div>
+
+            <!-- 新增：购买按钮 -->
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x82Ec31D69b3c289E541b50E30681FD1ACAd24444&chain=bsc" target="_blank" class="buy-now-btn">
+                <img src="/images/pancake.svg" alt="icon">
+            </a>
+
+            <!-- 猫咪展示区域 - 移动到 contract-wrapper 内 -->
+            <div class="cats-display">
+                <div class="cat-card">
+                    <img src="/images/mao1.png" class="cat-item" alt="cat 1">
+                    <span class="market-label" data-i18n="market_cap">市值</span>
+                    <div class="market-value" id="market-cap-value">--</div>
+                </div>
+                <div class="cat-card">
+                    <img src="/images/mao2.png" class="cat-item" alt="cat 2">
+                    <span class="market-label" data-i18n="liquidity">流动性</span>
+                    <div class="market-value" id="liquidity-value">--</div>
+                </div>
+                <div class="cat-card">
+                    <img src="/images/map3.png" class="cat-item" alt="cat 3">
+                    <span class="market-label" data-i18n="24h_change">24h涨跌幅</span>
+                    <div class="market-value" id="change-value">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部装饰 bg4_1 -->
+        <!-- <img src="/images/bg4_1.png" class="module-4-deco-bottom" alt="bottom decoration"> -->
+    </section>
+
+    <section class="module module-4" id="history">
+        <div class="timeline-line"></div>
+        <!-- 添加 time_bg 装饰，位于背景之上，时间轴之下 -->
+        <img src="/images/time_bg.png" class="time-bg-decoration" alt="time background decoration">
+
+        <div class="history-header">
+            <img src="/images/lf-1.svg" class="history-deco" alt="decoration left">
+            <h2 class="history-title" data-i18n="history_title">发展历程</h2>
+            <img src="/images/rg-1.svg" class="history-deco" alt="decoration right">
+        </div>
+        <div class="content">
+            <!-- 历史内容占位 -->
+        </div>
+        
+        <!-- 右侧时间轴装饰 -->
+        <div class="timeline-decoration">
+            
+            <!-- 时间轴节点 1 -->
+            <div class="timeline-row">
+                <img src="/images/coin.png" class="timeline-coin" alt="coin">
+                <div class="timeline-label-wrapper label-right">
+                    <div class="timeline-text-content">
+                        <div class="timeline-date" data-i18n="timeline_1_date">2025.10.07</div>
+                        <div class="timeline-desc">
+                            <p data-i18n="timeline_1_desc_1">哈基米作为中文MEME登录Web3舞台</p>
+                            <p data-i18n="timeline_1_desc_2">哈基米上线BNB CHAIN链</p>
+                            <p data-i18n="timeline_1_desc_3">哈基米成为24H交易量达100M</p>
+                            <p data-i18n="timeline_1_desc_4">哈基米10.11日市值突破95M</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 时间轴节点 2 -->
+            <div class="timeline-row">
+                <img src="/images/coin.png" class="timeline-coin" alt="coin">
+                <div class="timeline-label-wrapper label-left">
+                    <div class="timeline-text-content">
+                        <div class="timeline-date" data-i18n="timeline_2_date">2025.10.13</div>
+                        <div class="timeline-desc">
+                            <p data-i18n="timeline_2_desc_1">上线Binance Alpha</p>
+                            <p data-i18n="timeline_2_desc_2">同时期社区启动贡献者计划与社区文化矩阵计划。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 时间轴节点 3 -->
+            <div class="timeline-row">
+                <img src="/images/coin.png" class="timeline-coin" alt="coin">
+                <div class="timeline-label-wrapper label-right">
+                    <div class="timeline-text-content">
+                        <div class="timeline-date" data-i18n="timeline_3_date">2025.11.15</div>
+                        <div class="timeline-desc">
+                            <p data-i18n="timeline_3_desc_1">哈基米官方推特关注突破5000人</p>
+                            <p data-i18n="timeline_3_desc_2">哈基米频道关注突破7000人</p>
+                            <p data-i18n="timeline_3_desc_3">哈基米社区周边活动派送，举办哈基米文化创作者大赛</p>
+                            <p data-i18n="timeline_3_desc_4">哈基米基金会成立，同时期开启第一期慈善计划</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部装饰 bg4_1 -->
+        <img src="/images/bg4_1.png" class="module-5-deco-bottom" alt="bottom decoration">
+    </section>
+
+    <section class="module module-5" id="module-5">
+        <div class="community-wrapper">
+            <div class="community-container">
+                <div class="community-header">
+                    <img src="/images/p_left.svg" class="community-deco" alt="left decoration">
+                    <span class="community-title" data-i18n="community_title">主要社区账号</span>
+                    <img src="/images/p_right.svg" class="community-deco" alt="right decoration">
+                </div>
+            </div>
+            
+            <!-- 社区账号展示列表 -->
+            <div class="community-items">
+                <!-- 第一个卡片：Twitter 账号 -->
+                <a href="https://x.com/hajimi_CTO_BNB" target="_blank" class="community-card">
+                    <img src="/images/item1.png" class="card-bg" alt="community item 1">
+                    <div class="card-content">
+                        <div class="card-handle" data-i18n="card_1_handle">@hajimi_CTO_BNB</div>
+                        <div class="card-desc" data-i18n="card_1_desc">一句歌词到一只猫咪再到所有猫咪和所有事物的演变-哈基米文化。</div>
+                        <img src="/images/twitter.png" class="card-icon" alt="twitter icon">
+                    </div>
+                </a>
+                
+                <!-- 第二个卡片：基金会 -->
+                <a href="https://x.com/hajimi_fund" target="_blank" class="community-card">
+                    <img src="/images/item2.png" class="card-bg" alt="community item 2">
+                    <div class="card-content">
+                        <div class="card-handle" data-i18n="card_2_handle">@hajimi_fund</div>
+                        <div class="card-desc" data-i18n="card_2_desc">每一次的哈基米文化传播和慈善行动都是对世界最好的回报。</div>
+                        <img src="/images/twitter.png" class="card-icon" alt="twitter icon">
+                    </div>
+                </a>
+
+                <!-- 第三个卡片：文化网站 -->
+                <a href="https://hajimi-theta.vercel.app/" target="_blank" class="community-card">
+                    <img src="/images/item3.png" class="card-bg" alt="community item 3">
+                    <div class="card-content">
+                        <div class="card-handle" data-i18n="card_3_handle">@哈基米文化网站</div>
+                        <div class="card-desc" data-i18n="card_3_desc">哈基米文化网站，包含“视频，音乐，梗图等文化内容。</div>
+                        <img src="/images/web.png" class="card-icon" alt="web icon">
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="module module-6" id="module-6">
+        <div class="footer-header-wrapper">
+            <div class="community-container">
+                <div class="community-header">
+                    <img src="/images/p_left.svg" class="community-deco" alt="left decoration">
+                    <span class="community-title" data-i18n="footer_title">关注哈基米吧</span>
+                    <img src="/images/p_right.svg" class="community-deco" alt="right decoration">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 电视机装饰 (移出 wrapper 以相对于 module 定位) -->
+        <!-- 替换为文字内容 -->
+        <div class="module-6-text-content">
+            <h3 class="mod6-title" data-i18n="mod6_title">一句歌词到一只猫咪再到所有猫咪和所有事物的演变-哈基米文化</h3>
+            <div class="mod6-subtitle" data-i18n="mod6_subtitle">2021-2025的文化路程</div>
+            <ul class="mod6-list">
+                <li data-i18n="mod6_list_1"><span class="highlight">起源：</span>从动漫哼唱到文化解构</li>
+                <li data-i18n="mod6_list_2"><span class="highlight">突破时刻：</span>中国进行哈基米文化解构的阶段</li>
+                <li data-i18n="mod6_list_3"><span class="highlight">主流突破期（2023年至今）：</span>称霸短视频平台</li>
+                <li data-i18n="mod6_list_4"><span class="highlight">语义扩展：</span>从“可爱”到“生活方式” 链接Web2市场</li>
+                <li data-i18n="mod6_list_5"><span class="highlight">文化认可：</span>“哈基米”被列入Z世代社交媒体白皮书十大热门词汇之一。</li>
+            </ul>
+            <div class="mod6-conclusion" data-i18n="mod6_conclusion">这就是哈基米收获亿万粉丝和无数创作的历史</div>
+        </div>
+        
+        <!-- Z系列装饰 (层级在 bg6_1 之下) -->
+        <div class="z-decoration-group">
+            <img src="/images/z1.png" class="z-deco z1" alt="decoration z1">
+            <img src="/images/z2.png" class="z-deco z2" alt="decoration z2">
+            <img src="/images/z3.png" class="z-deco z3" alt="decoration z3">
+            <img src="/images/z4.png" class="z-deco z4" alt="decoration z4">
+        </div>
+
+        <!-- 底部装饰 bg6_1 -->
+        <img src="/images/bg6_1.png" class="module-6-deco-bottom" alt="bottom decoration">
+        
+        <!-- 底部装饰 bg6_line (在 bg6_1 之上) -->
+        <img src="/images/bg6_line.png" class="module-6-line" alt="line decoration">
+    </section>
+
+    <!-- 模块7：底部声明 -->
+    <section class="module module-7">
+        <div class="content-container">
+            <p class="module-7-text text-primary" data-i18n="mod7_disclaimer">免责声明： 哈基米是一个去中心化的迷因代币。没有团队，没有路线图，没有实用价值，没有任何收益预期，这不是财务建议，请自行研究。</p>
+            <p class="module-7-text text-secondary" data-i18n="mod7_quote">— 创建此网站的目的只想听你说一声「哈基米」。</p>
+        </div>
+    </section>
+
+    <!-- 简单页脚 -->
+    <footer class="simple-footer">
+        <p>© 2025 by Hajimi Community . All rights reserved!</p>
+    </footer>
+
+    <!-- 右侧浮动菜单 - 已移除 -->
+    <!-- 
+    <div class="buy-sidebar" id="buy-sidebar">
+        <img src="/images/buy2.png" class="buy-main" alt="buy menu">
+        <img src="/images/buy1.svg" class="buy-arrow" alt="arrow icon">
+        <div class="buy-content">
+            <div class="buy-title" data-i18n="buy_title">欢迎加入哈基米世界</div>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x82Ec31D69b3c289E541b50E30681FD1ACAd24444" target="_blank" class="buy-btn" data-i18n="buy_now">立即购买</a>
+        </div>
+    </div>
+    -->
+
+    <script src="/js/main.js?v=20251211_35"></script></script>
+</body>
+</html>
+

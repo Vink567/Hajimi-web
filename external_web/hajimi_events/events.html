@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>官方活动</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/css/toast.css">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* 加载页面样式 */
+    #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff8f0; /* 与主题色匹配的背景 */
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease;
+    }
+
+    .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .loader-logo {
+        width: 150px;
+        height: auto;
+        animation: bounce 2s infinite;
+    }
+
+    /* 进度条样式 */
+    .progress-container {
+        width: 300px;
+        height: 10px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 20px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .progress-bar {
+        width: 0%;
+        height: 100%;
+        background-color: #C07C59; /* 主题色 */
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-family: 'Arial', sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #C07C59;
+        margin-top: 10px;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+<body>
+    <!-- 加载页面 -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <img src="/images/loading.png" alt="Loading..." class="loader-logo">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0%</div>
+        </div>
+    </div>
+
+    <!-- 背景装饰 (猫爪) -->
+    <img src="/images/猫爪.png" class="cat-paw-decoration" alt="Background Decoration">
+
+    <script>
+        // 立即执行：检查缓存，如果有缓存则直接隐藏，防止闪烁
+        (function() {
+            if (localStorage.getItem('hajimi_events_visited')) {
+                var loader = document.getElementById('loading-screen');
+                if (loader) loader.style.display = 'none';
+            }
+        })();
+
+        // 加载动画逻辑
+        (function(){
+            var loader = document.getElementById('loading-screen');
+            // 如果loader被隐藏了，就不跑逻辑了
+            if (!loader || loader.style.display === 'none') return;
+
+            var progressBar = document.getElementById('progress-bar');
+            var progressText = document.getElementById('progress-text');
+            var progress = 0;
+            var loadInterval;
+
+            // 启动进度条动画
+            function startLoading() {
+                loadInterval = setInterval(function() {
+                    // 随机增加进度，模拟真实感
+                    var increment = Math.random() * 5; 
+                    progress += increment;
+                    
+                    // 在页面完全加载前，限制在 90%
+                    if (document.readyState !== 'complete' && progress > 90) {
+                        progress = 90;
+                    }
+                    
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(loadInterval);
+                        finishLoading();
+                    }
+                    
+                    updateUI(progress);
+                }, 100);
+            }
+
+            function updateUI(val) {
+                var p = Math.floor(val);
+                if (progressBar) progressBar.style.width = p + '%';
+                if (progressText) progressText.innerText = p + '%';
+            }
+
+            function finishLoading() {
+                setTimeout(function() {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        localStorage.setItem('hajimi_events_visited', 'true');
+                    }, 500);
+                }, 200);
+            }
+
+            // 开始动画
+            startLoading();
+
+            // 监听页面加载完成
+            window.addEventListener('load', function() {
+                // 页面加载完成后，快速跑完剩余进度
+                clearInterval(loadInterval);
+                loadInterval = setInterval(function() {
+                    progress += 5; 
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(loadInterval);
+                        updateUI(progress);
+                        finishLoading();
+                    } else {
+                        updateUI(progress);
+                    }
+                }, 20);
+            });
+        })();
+    </script>
+    <!-- 顶部导航栏 (标准化结构) -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <!-- 左侧区域：Logo -->
+            <a href="/" class="logo">
+                <img src="/images/logo.png" alt="HAJIMI">
+            </a>
+
+            <!-- 中间区域：导航链接 -->
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link" data-i18n="nav_home">首页</a></li>
+                <li><a href="https://hajimi-theta.vercel.app/" target="_blank" class="nav-link" data-i18n="nav_culture">哈基米文化</a></li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_ecosystem">哈基米生态</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="#" onclick="showPopup(event)" data-i18n="nav_concert">音乐会</a></li>
+                        <li><a href="/external_web/hajimi_emoji/emoji.html" data-i18n="nav_emoji">头像</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_foundation">基金会</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="/external_web/hajimi_beneficence/index.html" data-i18n="nav_charity">慈善</a></li>
+                        <li><a href="/external_web/hajimi_events/events.html" data-i18n="nav_activity">活动</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_community">社区</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="https://x.com/hajimi_CTO_BNB" target="_blank">Twitter</a></li>
+                        <li><a href="https://t.me/BNB_Hajimiiii" target="_blank">TG</a></li>
+                        <li><a href="https://www.tiktok.com/@hajimi_bnb" target="_blank">tiktok</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 右侧区域：语言切换 -->
+            <div class="nav-right">
+                <div class="lang-switch" id="lang-switch">
+                    <span class="current-lang">中文</span>
+                    <i class="fas fa-caret-down"></i>
+                    <ul class="lang-dropdown">
+                        <li data-lang="zh">中文</li>
+                        <li data-lang="en">English</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 汉堡菜单按钮 -->
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+  
+  <main class="container" style="margin-top: 120px;">
+    <div class="page-header-text">
+      <h1 data-i18n="headerTitle"></h1>
+      <p data-i18n="headerSubtitle"></p>
+    </div>
+    <div class="filters">
+      <button class="filter-chip chip-all" data-filter="all">全部</button>
+      <button class="filter-chip chip-limited" data-filter="limited">限时</button>
+      <button class="filter-chip chip-permanent" data-filter="permanent">常驻</button>
+      <button class="filter-chip chip-completed" data-filter="completed">完结</button>
+    </div>
+    <div id="activity-grid" class="grid"></div>
+    <div id="pagination" class="pagination"></div>
+  </main>
+  <!-- 简单页脚 -->
+  <footer class="simple-footer">
+      <p>© 2025 by Hajimi Community . All rights reserved!</p>
+  </footer>
+  <script src="events-nav.js"></script>
+  <script>
+    // 当前语言，默认中文
+    let lang = localStorage.getItem('hajimi_lang') || 'zh';
+    // 头部与导航文案（中英）
+    const i18n = {
+      zh: {
+        brand: '哈基米活动', home: '首页', headerTitle: '哈基米活动', headerSubtitle: '哈基米生态活动正在进行中，点击下方卡片访问详情', from: '起',
+        filters: { all: '全部', limited: '限时', permanent: '常驻', completed: '完结' }
+      },
+      en: {
+        brand: 'Hajimi Events', home: 'Home', headerTitle: 'Hajimi Events', headerSubtitle: 'Hajimi ecosystem events are ongoing. Click cards below for details', from: 'from',
+        filters: { all: 'All', limited: 'Limited', permanent: 'Permanent', completed: 'Completed' }
+      }
+    };
+    // 活动数据：支持开始/结束时间（北京时间），状态：限时/常驻/完结
+    const events = [
+      { title: { zh: '哈基米唱歌大赛S1', en: 'Hajimi Singing Contest S1' }, description: { zh: '来唱歌🎤吧，哈基米好声音', en: 'Let’s sing 🎤 — Hajimi Voice' }, image: 'images/1.jpg', url: 'https://x.com/hajimi_CTO_BNB/status/1990643902249120255', start: '2025-11-18', end: '2025-11-21', status: 'completed' },
+      { title: { zh: '拯救流浪计划', en: 'Rescue Stray Plan' }, description: { zh: '你的善举，不是施舍，是拯救。让每一只小猫，都拥有被爱的权利！', en: 'Your kindness is rescue, not charity. Every cat deserves love!' }, image: 'images/2.png', url: 'https://x.com/hajimi_fund/status/1987769574113382594', start: '2025-11-10', status: 'permanent' }
+    ];
+    // 从本地存储读取用户新增的活动
+    function getUserEvents() {
+      try {
+        const raw = localStorage.getItem('user_events');
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (_) { return []; }
+    }
+    // 远程 events.json（部署到云端时用于同步最新活动）
+    let remoteEvents = null;
+    async function fetchRemoteEvents() {
+      try {
+        const res = await fetch('events.json?v=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data)) remoteEvents = data;
+      } catch (_) { /* 网络异常则忽略 */ }
+    }
+    // 活动网格容器
+    const grid = document.getElementById('activity-grid');
+    function setTexts() {
+      // 设置带 data-i18n 的元素文本
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        // Skip navbar elements as they are handled by events-nav.js
+        if (el.closest('.navbar')) return;
+
+        const k = el.getAttribute('data-i18n');
+        if (i18n[lang] && i18n[lang][k]) {
+            el.textContent = i18n[lang][k];
+        }
+      });
+      // 更新筛选按钮文案（全部/限时/常驻/完结）
+      const f = i18n[lang].filters;
+      const chipAll = document.querySelector('.chip-all'); if (chipAll) chipAll.textContent = f.all;
+      const chipLimited = document.querySelector('.chip-limited'); if (chipLimited) chipLimited.textContent = f.limited;
+      const chipPermanent = document.querySelector('.chip-permanent'); if (chipPermanent) chipPermanent.textContent = f.permanent;
+      const chipCompleted = document.querySelector('.chip-completed'); if (chipCompleted) chipCompleted.textContent = f.completed;
+    }
+    // 状态标签文案
+    const statusText = {
+      zh: { permanent: '常驻', limited: '限时', completed: '完结' },
+      en: { permanent: 'Permanent', limited: 'Limited', completed: 'Completed' }
+    };
+    // 解析北京时间到毫秒时间戳（仅日期则按 00:00）
+    function parseBJ(dateStr) {
+      if (!dateStr) return null;
+      const s = String(dateStr).trim();
+      const parts = s.split(/\s+/);
+      const d = parts[0].replace(/\//g, '-');
+      const t = parts[1] ? parts[1] : '00:00';
+      const iso = `${d}T${t}:00+08:00`;
+      const ms = Date.parse(iso);
+      return Number.isFinite(ms) ? ms : null;
+    }
+    // 计算动态状态：超过结束时间则视为完结
+    function effectiveStatus(item, nowMs) {
+      const endMs = parseBJ(item.end);
+      if (endMs && nowMs >= endMs) return 'completed';
+      return item.status;
+    }
+    // 格式化显示为 YYYY/MM/DD（不含时间）
+    function fmtFull(d) {
+      if (!d) return '';
+      const dt = new Date(d);
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth()+1).padStart(2,'0');
+      const day = String(dt.getDate()).padStart(2,'0');
+      return `${y}/${m}/${day}`;
+    }
+    function formatRange(start, end) {
+      // 结束存在则显示完整范围；否则显示“起”
+      const sFull = fmtFull(start);
+      if (end) {
+        const eFull = fmtFull(end);
+        return `${sFull} - ${eFull}`;
+      }
+      return lang === 'zh' ? `${sFull}${i18n[lang].from}` : `${i18n[lang].from} ${sFull}`;
+    }
+    // 渲染单张卡片
+    function renderCard(item) {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = item.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.setAttribute('aria-label', item.title[lang]);
+      const img = document.createElement('img');
+      img.src = item.image;
+      img.alt = item.title[lang];
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      const h3 = document.createElement('h3');
+      h3.textContent = item.title[lang];
+      const p = document.createElement('p');
+      p.textContent = item.description[lang];
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+      meta.textContent = formatRange(item.start, item.end);
+      // 根据当前时间计算状态并显示徽章
+      const nowMs = Date.now();
+      const st = effectiveStatus(item, nowMs);
+      const badge = document.createElement('div');
+      badge.className = `badge badge-${st}`;
+      badge.textContent = statusText[lang][st];
+      content.appendChild(h3);
+      content.appendChild(p);
+      content.appendChild(meta);
+      a.appendChild(img);
+      a.appendChild(badge);
+      a.appendChild(content);
+      return a;
+    }
+    // 当前筛选状态与内容高度基线
+    let filterStatus = null;
+    let baseContentHeight = 0;
+    
+    // Pagination variables
+    let currentPage = 1;
+    const itemsPerPage = 12; // 4 columns * 3 rows = 12 items
+
+    // 排序：状态优先级 + 同类按开始时间最近在前
+    function sortEvents(list, nowMs) {
+      const pri = { limited: 0, permanent: 1, completed: 2 };
+      return list.slice().sort((a,b) => {
+        const ap = pri[effectiveStatus(a, nowMs)], bp = pri[effectiveStatus(b, nowMs)];
+        if (ap !== bp) return ap - bp;
+        const ad = parseBJ(a.start) || 0;
+        const bd = parseBJ(b.start) || 0;
+        return bd - ad;
+      });
+    }
+
+    function renderEvents() {
+      // 批量渲染，使用 DocumentFragment 减少重排
+      grid.innerHTML = '';
+      const paginationContainer = document.getElementById('pagination');
+      if (paginationContainer) paginationContainer.innerHTML = '';
+
+      const nowMs = Date.now();
+      const base = remoteEvents || [];
+      const filteredList = sortEvents((filterStatus ? base.filter(e => effectiveStatus(e, nowMs) === filterStatus) : base), nowMs);
+      
+      // Calculate total pages
+      const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+      
+      // Ensure currentPage is valid
+      if (currentPage > totalPages) currentPage = totalPages || 1;
+      if (currentPage < 1) currentPage = 1;
+
+      // Slice list for current page
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const list = filteredList.slice(startIndex, endIndex);
+
+      const frag = document.createDocumentFragment();
+      list.forEach(e => frag.appendChild(renderCard(e)));
+      grid.appendChild(frag);
+      
+      // Render pagination if needed
+      if (totalPages > 1) {
+          renderPagination(totalPages);
+      }
+
+      const h = equalizeCardContentHeights();
+      if (!filterStatus) baseContentHeight = Math.max(baseContentHeight, h);
+    }
+
+    function renderPagination(totalPages) {
+        const paginationContainer = document.getElementById('pagination');
+        if (!paginationContainer) return;
+
+        // Previous Button
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '<';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderEvents();
+                window.scrollTo({ top: document.querySelector('.filters').offsetTop - 100, behavior: 'smooth' });
+            }
+        };
+        paginationContainer.appendChild(prevBtn);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            if (i === currentPage) btn.classList.add('active');
+            btn.onclick = () => {
+                currentPage = i;
+                renderEvents();
+                window.scrollTo({ top: document.querySelector('.filters').offsetTop - 100, behavior: 'smooth' });
+            };
+            paginationContainer.appendChild(btn);
+        }
+
+        // Next Button
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = '>';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderEvents();
+                window.scrollTo({ top: document.querySelector('.filters').offsetTop - 100, behavior: 'smooth' });
+            }
+        };
+        paginationContainer.appendChild(nextBtn);
+    }
+
+    function setLang(l) {
+      // 切换语言并刷新页面文本与卡片
+      lang = l;
+      localStorage.setItem('hajimi_lang', l);
+      setTexts();
+      renderEvents();
+    }
+    // Expose for events-nav.js
+    window.setPageLanguage = setLang;
+    
+    function equalizeCardContentHeights() {
+      // 统一所有卡片内容区高度，避免筛选时跳动
+      const boxes = Array.from(document.querySelectorAll('.card-content'));
+      boxes.forEach(b => { b.style.height = ''; });
+      if (!boxes.length) return 0;
+      const maxH = Math.max(...boxes.map(b => b.offsetHeight));
+      const target = Math.max(baseContentHeight, maxH);
+      boxes.forEach(b => { b.style.height = target + 'px'; });
+      return target;
+    }
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      // 防抖：窗口大小变化时重新计算高度
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(equalizeCardContentHeights, 150);
+    });
+    const chips = Array.from(document.querySelectorAll('.filter-chip'));
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.add('feedback');
+        setTimeout(() => { chip.classList.remove('feedback'); }, 400);
+        const val = chip.getAttribute('data-filter');
+        if (val === 'all') {
+          filterStatus = null;
+          chips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+        } else if (filterStatus === val) {
+          filterStatus = null;
+          chips.forEach(c => c.classList.remove('active'));
+          const allChip = document.querySelector('.chip-all');
+          if (allChip) allChip.classList.add('active');
+        } else {
+          filterStatus = val;
+          chips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+        }
+        // 重置页码
+        currentPage = 1;
+        // 切换筛选后重新渲染与对齐高度
+        renderEvents();
+      });
+    });
+    const allChip = document.querySelector('.chip-all');
+    if (allChip) allChip.classList.add('active');
+    fetchRemoteEvents().finally(() => { setLang(lang); });
+    // 每分钟自动刷新一次，以更新完结状态
+    setInterval(renderEvents, 60000);
+  </script>
+</body>
+</html>

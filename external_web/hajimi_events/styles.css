@@ -1,0 +1,626 @@
+/* 主题色与基础变量（中文注释） */
+:root { --bg: #ffffff; --fg: #111111; --muted: #666666; --card-bg: #ffffff; --border: #e5e7eb; --shadow: 0 8px 24px rgba(0,0,0,.08); --primary: #2563eb; }
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) { :root { --bg: #0b0f17; --fg: #f3f4f6; --muted: #9ca3af; --card-bg: #111827; --border: #1f2937; --shadow: 0 8px 24px rgba(0,0,0,.5); } }
+/* 全局盒模型与基础排版 */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.6; background: #DB8B58; color: #ffffff; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Cat Paw Decoration */
+.cat-paw-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Ensure content is above decoration */
+main {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+/* Update card text color since body is now white text */
+.card { color: #333; }
+
+/* 页面内容容器宽度 - 增加宽度以容纳4列 */
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+/* 注册自定义字体 */
+@font-face {
+    font-family: 'ZiYouFangHuaTi';
+    src: url('/assets/ZiYouFangHuaTi.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 导航栏样式 */
+.navbar {
+    background-color: rgba(0, 0, 0, 0.3); /* 淡灰色(黑透)毛玻璃背景 */
+    backdrop-filter: blur(10px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(10px);
+    height: 90px; /* 设置导航栏高度为 90px，与主官网一致 */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s ease;
+    padding: 0 20px; /* Match Avatar page padding */
+}
+
+/* 导航栏内部容器特殊处理 - 匹配主官网布局 */
+.navbar .container {
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+/* 滚动后的导航栏样式 */
+.navbar.scrolled {
+    background-image: none; /* 移除背景图片 */
+    background-color: rgba(0, 0, 0, 0.5); /* 滚动后加深颜色 */
+    backdrop-filter: blur(15px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(15px); /* 兼容 Safari */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    height: 90px; /* 滚动后高度保持 90px */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 左侧 Logo */
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 70px;
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.1);
+}
+
+/* 中间导航菜单 */
+.nav-menu {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* 让菜单占据剩余空间 */
+    margin: 0 20px;
+}
+
+.nav-menu > li {
+    margin: 0 25px; /* 调整间距 */
+    position: relative;
+}
+
+/* 导航链接样式 */
+.nav-link {
+    text-decoration: none;
+    color: #fff;
+    font-size: 36px; /* 增大字体大小 (原20px) */
+    font-weight: normal; /* 去除加粗 */
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    /* 确保使用自定义字体 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; 
+}
+
+/* 悬停效果 - 椭圆框 + 内部白色渐变 */
+.nav-link:hover {
+    border: 2px solid #fff; /* 边框保持实心白色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border-radius: 50px;
+}
+
+/* 电脑端隐藏下拉箭头 */
+@media screen and (min-width: 993px) {
+    .nav-link i {
+        display: none;
+    }
+}
+
+/* --- 子菜单样式 (仿图二) --- */
+.submenu {
+    display: none;
+    position: absolute;
+    top: 100%; /* 父元素下方 */
+    left: 50%;
+    transform: translateX(-50%); /* 水平居中 */
+    
+    /* 蓝色卡片背景 */
+    background-color: #2D9CDB; /* 类似图中的蓝色，也可以吸管取色 */
+    background-image: linear-gradient(to bottom, #3498db, #2980b9); /* 可选渐变 */
+    
+    min-width: 140px; /* 宽度适中 */
+    border-radius: 10px; /* 圆角 */
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 10px; /* 距离父级一点距离 */
+    
+    /* 小三角 (可选，如果需要) */
+}
+
+/* 增加一个透明的伪元素桥梁，防止鼠标移出链接时子菜单立刻消失 */
+.submenu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+/* 显示子菜单 */
+.has-submenu:hover .submenu {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.submenu li {
+    margin: 0;
+    text-align: center; /* 内容居中 */
+}
+
+.submenu li a {
+    display: block;
+    padding: 12px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: normal; /* 去除加粗 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; /* 子菜单也用该字体 */
+    transition: background 0.3s;
+    border: 1px solid transparent; /* 预留边框位置，防止抖动 */
+}
+
+/* 子菜单项悬停 (椭圆框边框效果) */
+.submenu li a:hover {
+    background-color: transparent; /* 移除背景色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border: 1px solid #fff; /* 添加白色边框 */
+    border-radius: 50px; /* 椭圆效果 */
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 右侧区域 (语言切换) */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* 语言切换按钮 */
+.lang-switch {
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 30px; /* 加大圆角以适应更大字体 */
+    padding: 5px 20px;
+    cursor: pointer;
+    font-size: 30px; /* 增大字体大小，与社区(导航链接)一致 */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    transition: all 0.3s ease;
+    position: relative; /* 为下拉菜单定位 */
+    justify-self: auto; /* 重置 grid 属性 */
+}
+
+.lang-switch:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* 语言下拉菜单 */
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%; /* 紧贴父元素底部 */
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    background-color: #2D9CDB;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    min-width: 140px; /* 增加宽度 */
+    border-radius: 10px;
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 15px; /* 使用 margin 制造视觉间距 */
+    z-index: 2000; /* 提高层级，确保在最上层 */
+}
+
+/* 增加透明桥梁防止鼠标移出消失 */
+.lang-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -20px; /* 向上延伸覆盖 margin-top 的间隙 */
+    left: 0;
+    width: 100%;
+    height: 25px; /* 高度足够覆盖间隙 */
+}
+
+/* 显示语言下拉菜单 */
+.lang-switch:hover .lang-dropdown,
+.lang-switch.active .lang-dropdown {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.lang-dropdown li {
+    padding: 12px 20px; /* 增加内边距 */
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 30px; /* 增大字体，与子菜单一致 */
+    border: 1px solid transparent;
+    border-radius: 50px;
+    margin: 5px 10px;
+}
+
+.lang-dropdown li:hover {
+    background-color: transparent;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+    border: 1px solid #fff;
+}
+
+/* 汉堡菜单 (默认隐藏) */
+.menu-toggle {
+    display: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+/* 页头区域 */
+.site-header { 
+    border-bottom: none; 
+    position: relative;
+    padding: 0;
+    min-height: auto;
+    background: none;
+    line-height: 0; /* 消除图片底部间隙 */
+}
+.header-banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 页面标题文本区 */
+.page-header-text {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+.page-header-text h1 { 
+    margin: 0; 
+    font-size: 28px; 
+    color: #ffffff; /* Adapted for green background */
+}
+.page-header-text p { 
+    margin: 8px 0 0; 
+    color: rgba(255, 255, 255, 0.9); 
+}
+
+/* 状态筛选标签 */
+.filters { 
+    margin-top: 0; 
+    margin-bottom: 20px; 
+    display: flex; 
+    justify-content: flex-start; 
+    gap: 12px; 
+}
+.filter-chip { appearance: none; border: none; color: #fff; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-weight: 700; box-shadow: 0 6px 16px rgba(0,0,0,.12); position: relative; transition: transform .2s ease, filter .2s ease; }
+.chip-all { background: #9ca3af; color: #fff; }
+.chip-limited { background: #f59e0b; }
+.chip-permanent { background: #10b981; }
+.chip-completed { background: #ef4444; }
+.filter-chip.active { border: none; outline: none; color: #000; filter: brightness(1.15); }
+.filter-chip:active { transform: scale(.96); }
+@keyframes chipPulse { 0% { transform: scale(1); filter: brightness(1); } 20% { transform: scale(.94); filter: brightness(1.1); } 100% { transform: scale(1); filter: brightness(1); } }
+.filter-chip.feedback { animation: chipPulse .4s ease; }
+/* 移除旧的 h1/p 样式，已在 .page-header-text 中重新定义 */
+/* .site-header h1 { margin: 0; font-size: 28px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); } */
+/* .site-header p { margin: 8px 0 0; color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.5); } */
+/* 头部装饰动图区域：已移除 */
+/* .header-decor { ... } */
+/* .decor { ... } */
+/* 活动卡片网格与固定卡片尺寸 */
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding-top: 24px; justify-content: start; }
+/* 卡片样式：宽度自适应 */
+.card { display: flex; flex-direction: column; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); text-decoration: none; color: #333; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; width: 100%; }
+/* 响应式调整：屏幕较窄时减少列数 */
+@media (max-width: 1200px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+}
+.card { position: relative; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,.12); border-color: var(--primary); }
+.card:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, .2); }
+/* 图片完整展示，不裁剪 */
+.card img { width: 100%; height: 180px; object-fit: contain; background: #dddddd; }
+/* 内容区与日期、状态徽章定位 */
+.card-content { padding: 20px 16px 16px 16px; position: relative; min-height: 150px; display: flex; flex-direction: column; }
+.card-content h3 { word-break: break-word; }
+.card-meta { margin-top: auto; text-align: right; font-size: 12px; color: var(--muted); }
+.badge { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 6px 16px rgba(0,0,0,.12); }
+.badge-permanent { background: #10b981; }
+.badge-limited { background: #f59e0b; }
+.badge-completed { background: #ef4444; }
+.card-content h3 { margin: 0 0 6px; font-size: 18px; }
+.card-content p { margin: 0; color: var(--muted); font-size: 14px; }
+/* 语言箭头旋转动画 */
+.lang-arrow { display: inline-block; transition: transform .2s ease; }
+.lang-switch.open .lang-arrow { transform: rotate(180deg); }
+
+/* Footer */
+.simple-footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 5px;
+    background: #333;
+    color: #fff;
+    font-size: 0.9rem;
+    margin-top: 40px;
+}
+/* 后台表单样式（简洁复用现有按钮色） */
+.admin-form { display: grid; gap: 16px; max-width: 720px; }
+.form-row { display: grid; gap: 8px; }
+.form-row label { font-weight: 700; color: var(--fg); }
+.admin-form input[type="text"],
+.admin-form input[type="url"],
+.admin-form input[type="datetime-local"],
+.admin-form textarea,
+.admin-form select { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--fg); }
+.form-actions { display: flex; gap: 12px; align-items: center; }
+.preview { margin-top: 8px; }
+.admin-list h2 { margin-top: 24px; }
+
+/* 导航栏响应式适配 (从主站同步) */
+@media screen and (max-width: 1700px) {
+    .nav-menu > li {
+        margin: 0 30px; /* 减小间距 */
+    }
+    .nav-link {
+        font-size: 32px; /* 稍微减小字体 */
+    }
+}
+
+@media screen and (max-width: 1450px) {
+    .nav-menu > li {
+        margin: 0 15px; /* 进一步减小间距 */
+    }
+    .nav-link {
+        font-size: 26px; /* 减小字体 */
+        padding: 5px 10px;
+    }
+    .logo img {
+        height: 60px; /* 缩小 Logo */
+    }
+    .lang-switch {
+        font-size: 24px;
+        padding: 4px 15px;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .navbar .container {
+        padding: 0 10px;
+    }
+    .nav-menu {
+        margin: 0 10px;
+    }
+    .nav-menu > li {
+        margin: 0 10px;
+    }
+    .nav-link {
+        font-size: 22px;
+    }
+    .logo img {
+        height: 50px;
+    }
+    .lang-switch {
+        font-size: 20px;
+        padding: 3px 10px;
+    }
+}
+
+/* 移动端自适应 */
+@media screen and (max-width: 992px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* 移动端 Logo 依然在左 */
+    .logo {
+        flex-grow: 0;
+    }
+
+    /* 移动端菜单隐藏，变为全屏或侧滑 */
+    .nav-menu {
+        position: fixed;
+        top: 90px; /* 匹配新的导航栏高度 (90px) */
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 90px);
+        background-color: #2D9CDB; /* 与语言菜单一致的蓝色背景 */
+        background-image: linear-gradient(to bottom, #3498db, #2980b9);
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 0;
+        padding: 40px 0 0 0; /* 移除默认的左侧内边距 */
+        overflow-y: auto;
+        
+        /* 修改动画为淡入/下滑，而不是从左侧滑入 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-menu > li {
+        margin: 15px 0;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* 移动端导航链接样式调整 */
+    .nav-link {
+        font-size: 26px; /* 移动端增大字体 (原22px) */
+        justify-content: center;
+        display: inline-flex; /* 使用 inline-flex 让边框包裹文字 */
+        padding: 8px 20px; /* 调整内边距，参考网页版，不宜过大 */
+        border: 1.5px solid transparent; /* 减小边框厚度，避免过于厚重 */
+    }
+    
+    /* 移动端悬停/激活样式 */
+    .nav-link:hover,
+    .has-submenu.active > .nav-link {
+        border: 1.5px solid #fff; /* 恢复实心白边框 */
+        background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变 */
+        border-radius: 50px;
+    }
+    
+    /* 移动端显示下拉箭头 */
+    .nav-link i {
+        display: inline-block; /* 确保图标显示 */
+        margin-left: 8px;
+        font-size: 16px;
+        transition: transform 0.3s ease; /* 三角形旋转动画 */
+    }
+    
+    /* 当子菜单激活时，旋转三角形 */
+    .has-submenu.active > .nav-link i {
+        transform: rotate(180deg);
+    }
+    
+    /* 移动端右侧语言切换显示 */
+    .nav-right {
+        display: flex; /* 在移动端显示 */
+        margin-right: 15px; /* 与汉堡菜单保持间距 */
+    }
+
+    .lang-switch {
+        padding: 4px 12px; /* 稍微减小内边距 */
+        font-size: 16px; /* 稍微减小字体 */
+    }
+    
+    .lang-dropdown {
+        top: 120%; /* 增加下拉菜单距离，防止遮挡 */
+        width: 120px; /* 调整下拉菜单宽度 */
+    }
+
+    .lang-dropdown li {
+        font-size: 16px; /* 调整下拉菜单字体 */
+        padding: 10px 15px;
+    }
+    
+    /* 移动端子菜单 */
+    .submenu {
+        position: static;
+        transform: none;
+        background-color: rgba(0,0,0,0.2);
+        background-image: none;
+        width: 100%;
+        box-shadow: none;
+        display: none;
+        margin-top: 0;
+        padding: 10px 0;
+        border-radius: 0;
+    }
+    
+    .has-submenu:hover .submenu {
+        display: none; /* 禁用 hover 显示 */
+    }
+    
+    /* 移动端点击显示子菜单，无动画 */
+    .has-submenu.active .submenu {
+        display: block;
+        animation: none; /* 禁用 fadeIn 动画 */
+    }
+    
+    /* 移动端子菜单项样式 */
+    .submenu li a {
+        display: inline-block; /* 让子菜单项也是适应内容宽度 */
+        margin: 5px 0;
+        padding: 8px 20px; /* 减小一点 padding */
+        font-size: 16px;
+        text-align: center; /* 确保文字居中 */
+    }
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    gap: 10px;
+}
+
+.pagination button {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.pagination button:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.pagination button.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -1,0 +1,2171 @@
+/* 全局重置 */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 120px; /* 解决固定导航栏遮挡锚点问题，略大于导航栏高度(110px) */
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 注册自定义字体 */
+@font-face {
+    font-family: 'ZiYouFangHuaTi';
+    src: url('/assets/ZiYouFangHuaTi.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+    font-family: 'ZiYouFangHuaTi', 'AlimamaFangYuanTi', 'Arial', 'Microsoft YaHei', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden; /* 防止水平溢出 */
+}
+
+.container {
+    max-width: 95%; /* 增加宽度，使左右元素更靠边 */
+    margin: 0 auto;
+    padding: 0 20px; /* 减少内边距 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+/* 导航栏样式 */
+.navbar {
+    background-color: rgba(0, 0, 0, 0.3); /* 淡灰色(黑透)毛玻璃背景，确保白底能看清白字 */
+    backdrop-filter: blur(10px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(10px);
+    height: 90px; /* 设置导航栏高度为 110px */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s ease;
+}
+
+/* 滚动后的导航栏样式 */
+.navbar.scrolled {
+    background-image: none; /* 移除背景图片 */
+    background-color: rgba(0, 0, 0, 0.5); /* 滚动后加深颜色 */
+    backdrop-filter: blur(15px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(15px); /* 兼容 Safari */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    height: 90px; /* 滚动后高度保持 110px */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 增加边缘质感 */
+}
+
+/* 左侧 Logo */
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 70px;
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.1);
+}
+
+/* 中间导航菜单 */
+.nav-menu {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* 让菜单占据剩余空间 */
+    margin: 0 20px;
+}
+
+.nav-menu > li {
+    margin: 0 25px; /* 调整间距 (原 60px -> 25px) */
+    position: relative;
+}
+
+/* 导航链接样式 */
+.nav-link {
+    text-decoration: none;
+    color: #fff;
+    font-size: 36px; /* 增大字体大小 (原24px -> 36px) */
+    font-weight: normal; /* 去除加粗 */
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    /* 确保使用自定义字体 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; 
+}
+
+/* 悬停效果 - 椭圆框 + 内部白色渐变 */
+.nav-link:hover {
+    border: 2px solid #fff; /* 边框保持实心白色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border-radius: 50px;
+}
+
+/* 电脑端隐藏下拉箭头 */
+@media screen and (min-width: 993px) {
+    .nav-link i {
+        display: none;
+    }
+}
+
+/* --- 子菜单样式 (仿图二) --- */
+.submenu {
+    display: none;
+    position: absolute;
+    top: 100%; /* 父元素下方 */
+    left: 50%;
+    transform: translateX(-50%); /* 水平居中 */
+    
+    /* 蓝色卡片背景 */
+    background-color: #2D9CDB; /* 类似图中的蓝色，也可以吸管取色 */
+    background-image: linear-gradient(to bottom, #3498db, #2980b9); /* 可选渐变 */
+    
+    min-width: 140px; /* 宽度适中 */
+    border-radius: 10px; /* 圆角 */
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 10px; /* 距离父级一点距离 */
+    
+    /* 小三角 (可选，如果需要) */
+}
+
+/* 增加一个透明的伪元素桥梁，防止鼠标移出链接时子菜单立刻消失 */
+.submenu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+/* 显示子菜单 */
+.has-submenu:hover .submenu {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.submenu li {
+    margin: 0;
+    text-align: center; /* 内容居中 */
+}
+
+.submenu li a {
+    display: block;
+    padding: 12px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: normal; /* 去除加粗 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; /* 子菜单也用该字体 */
+    transition: background 0.3s;
+    border: 1px solid transparent; /* 预留边框位置，防止抖动 */
+}
+
+/* 子菜单项悬停 (椭圆框边框效果) */
+.submenu li a:hover {
+    background-color: transparent; /* 移除背景色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border: 1px solid #fff; /* 添加白色边框 */
+    border-radius: 50px; /* 椭圆效果 */
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 右侧区域 (语言切换) */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* 语言切换按钮 */
+.lang-switch {
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 30px; /* 加大圆角以适应更大字体 */
+    padding: 5px 20px;
+    cursor: pointer;
+    font-size: 30px; /* 增大字体大小 */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    transition: all 0.3s ease;
+    position: relative; /* 为下拉菜单定位 */
+}
+
+.lang-switch:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* 语言下拉菜单 */
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%; /* 紧贴父元素底部 */
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    background-color: #2D9CDB;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    min-width: 140px; /* 增加宽度 */
+    border-radius: 10px;
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 15px; /* 使用 margin 制造视觉间距 */
+    z-index: 2000; /* 提高层级，确保在最上层 */
+}
+
+/* 汉堡菜单 (默认隐藏) */
+.menu-toggle {
+    display: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2001; /* 确保在最上层 */
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+}
+
+/* 导航栏响应式适配 */
+@media screen and (max-width: 1700px) {
+    .nav-menu > li {
+        margin: 0 30px; /* 减小间距 */
+    }
+    .nav-link {
+        font-size: 32px; /* 稍微减小字体 */
+    }
+}
+
+@media screen and (max-width: 1450px) {
+    .nav-menu > li {
+        margin: 0 15px; /* 进一步减小间距 */
+    }
+    .nav-link {
+        font-size: 26px; /* 减小字体 */
+        padding: 5px 10px;
+    }
+    .logo img {
+        height: 60px; /* 缩小 Logo */
+    }
+    .lang-switch {
+        font-size: 24px;
+        padding: 4px 15px;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .container {
+        padding: 0 10px;
+    }
+    .nav-menu {
+        margin: 0 10px;
+    }
+    .nav-menu > li {
+        margin: 0 10px;
+    }
+    .nav-link {
+        font-size: 22px;
+    }
+    .logo img {
+        height: 50px;
+    }
+    .lang-switch {
+        font-size: 20px;
+        padding: 3px 10px;
+    }
+}
+
+/* 移动端导航栏适配 (Max-width: 992px) */
+@media screen and (max-width: 992px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    .logo {
+        flex-grow: 0;
+    }
+
+    .nav-menu {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 90px);
+        background-color: #2D9CDB; /* 与语言菜单一致的蓝色背景 */
+        background-image: linear-gradient(to bottom, #3498db, #2980b9);
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 0;
+        padding-top: 40px;
+        overflow-y: auto;
+        
+        /* 动画效果 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-menu > li {
+        margin: 20px 0 !important; /* 强制生效：用户设置 100px */
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav-link {
+        font-size: 36px; /* 增大字体 26px -> 36px */
+        justify-content: center;
+        display: inline-flex;
+        padding: 8px 20px;
+        border: 1.5px solid transparent;
+    }
+    
+    .nav-link:hover,
+    .has-submenu.active > .nav-link {
+        border: 1.5px solid #fff;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+        border-radius: 50px;
+    }
+    
+    .nav-link i {
+        display: inline-block;
+        margin-left: 8px;
+        font-size: 16px;
+        transition: transform 0.3s ease;
+    }
+    
+    .has-submenu.active > .nav-link i {
+        transform: rotate(180deg);
+    }
+    
+    .nav-right {
+        display: flex;
+        margin-right: 15px;
+    }
+
+    .lang-switch {
+        padding: 4px 12px;
+        font-size: 16px;
+    }
+    
+    .lang-dropdown {
+        top: 120%;
+        width: 120px;
+    }
+
+    .lang-dropdown li {
+        font-size: 20px;
+        padding: 8px 10px;
+    }
+}
+
+/* 增加透明桥梁防止鼠标移出消失 */
+.lang-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -20px; /* 向上延伸覆盖 margin-top 的间隙 */
+    left: 0;
+    width: 100%;
+    height: 25px; /* 高度足够覆盖间隙 */
+}
+
+/* 显示语言下拉菜单 */
+.lang-switch:hover .lang-dropdown,
+.lang-switch.active .lang-dropdown {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.lang-dropdown li {
+    padding: 12px 20px; /* 增加内边距 */
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 30px; /* 增大字体，与子菜单一致 */
+    border: 1px solid transparent;
+    border-radius: 50px;
+    margin: 5px 10px;
+}
+
+.lang-dropdown li:hover {
+    background-color: transparent;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+    border: 1px solid #fff;
+}
+
+/* 汉堡菜单 (默认隐藏) - 已移除
+.menu-toggle {
+    display: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+*/
+
+/* 模块样式 */
+.module {
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 120px;
+    position: relative; /* 添加相对定位，作为绝对定位子元素的参考 */
+}
+
+/* 模块一底部的草地装饰 */
+.grass-decoration {
+    position: absolute;
+    bottom: 0; /* 贴底 */
+    left: 50%; /* 居中定位起点 */
+    transform: translateX(-50%); /* 水平居中 */
+    width: 100%; /* 宽度设置为100%，自适应屏幕宽度 */
+    max-width: 100%; /* 防止溢出屏幕 */
+    height: auto; /* 高度自适应，保持比例 */
+    z-index: 5; /* 层级大于 banner (默认0) */
+    pointer-events: none; 
+    display: block;
+}
+
+/* 模块一特殊处理 */
+.module-1 {
+    /* 移除背景图，改用 img 标签 */
+    background-image: none;
+    background-color: transparent;
+    height: auto !important; /* 强制覆盖 min-height */
+    min-height: 0 !important; /* 允许高度小于视口 */
+    padding-top: 0; /* 移除顶部内边距 */
+    display: block; /* 取消 flex 布局，让图片自然撑开 */
+}
+
+/* 模块一背景图样式 */
+.module-1-bg {
+    width: 100%;
+    height: auto;
+    display: block; /* 消除图片底部默认间隙 */
+}
+
+.module-2 {
+    /* 设置模块二背景颜色为 #55B8A5 */
+    background-color: #55B8A5;
+    background-image: none;
+    color: #fff;
+    position: relative;
+    z-index: 20; /* 层级大于 grass (5) */
+    height: 670px; /* 固定高度，缩小模块高度 */
+    min-height: 0; /* 允许高度小于视口 */
+    padding: 0; /* 移除内边距，让图片完全填充 */
+    display: block; /* 恢复块级显示 */
+    overflow: hidden; /* 允许裁剪背景图 */
+}
+
+/* 猫爪装饰样式 */
+.cat-paw-decoration {
+    position: absolute; /* 改为绝对定位，铺满容器 */
+    top: 0;
+    left: 0;
+    width: 100%; /* 宽度占满 */
+    height: 100%; /* 高度占满 */
+    object-fit: cover; /* 保持比例裁剪，实现“遮挡裁剪”效果 */
+    object-position: top center; /* 顶部居中对齐 */
+    z-index: 25; /* 层级大于 bg2 (20) */
+    pointer-events: none;
+    margin: 0;
+}
+
+/* "关于"部分文本样式 */
+.about-container {
+    position: absolute; /* 绝对定位，覆盖在猫爪图片之上 */
+    top: 0;
+    left: 0;
+    width: 100%; /* 宽度占满 */
+    height: 100%; /* 高度占满，与猫爪图片一致 */
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 */
+    padding: 5% 0; /* 减少上下内边距 (原 10% 0 5%) */
+    
+    text-align: center;
+    color: #fff;
+    z-index: 30; /* 层级大于猫爪 (25) */
+}
+
+.about-header {
+    display: flex;
+    justify-content: center;
+    gap: 120px; /* 增加间距 (原 30px) */
+    align-items: center;
+    margin-bottom: 30px;
+    width: 100%;
+    position: relative;
+}
+
+.about-deco {
+    height: auto;
+    width: 15vw;
+    max-width: none;
+}
+
+.about-title {
+    font-size: 4vw; /* 缩小字体 (原 6vw) */
+    font-weight: normal;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    position: relative;
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.about-text {
+    font-size: 28px; /* 字体缩小 (原 36px) */
+    margin-bottom: 15px;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    line-height: 1.5;
+}
+
+/* 创作按钮样式 */
+.create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px; /* 减小间距 */
+    margin-top: auto; /* 自动推到最底部 */
+    padding: 15px 50px; /* 减小内边距 (原 28px 80px) */
+    border: 3px solid rgba(255, 255, 255, 0.5); /* 减小边框粗细 */
+    border-radius: 60px; /* 减小圆角 */
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    text-decoration: none;
+    font-size: 28px; /* 减小字体 (原 40px) */
+    font-weight: normal; /* 不加粗 */
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px); /* 磨砂效果 */
+}
+
+.create-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+.create-btn img {
+    width: 36px; /* 减小图标 (原 48px) */
+    height: auto;
+    transform: rotate(15deg); /* 稍微旋转猫爪 */
+}
+
+/* 购买按钮样式 (新增) - 纯图片按钮 */
+.buy-now-btn {
+    display: inline-block;
+    margin-top: 20px; /* 与上方元素保持距离 */
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.3s;
+}
+
+.buy-now-btn img {
+    height: auto;
+    width: 62px; /* 缩小1.5倍：93px / 1.5 ≈ 62px */
+    display: block;
+}
+
+.buy-now-btn:hover {
+    transform: scale(1.05);
+    box-shadow: none; /* 悬停时不显示阴影，或者可以加一个适合图片的投影 */
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3)); /* 使用 drop-shadow 给不规则图片加阴影 */
+}
+
+
+.module-3 {
+    /* 设置模块三背景颜色为 #55B8A5 */
+    background-color: #55B8A5;
+    background-image: none;
+    /* background-image: url('../images/bg2.png'); */
+    /* background-size: 100% auto; */
+    /* background-position: top center; */
+    /* background-repeat: repeat-y; */
+    color: #fff;
+    position: relative; /* 确保子元素定位相对于此 */
+    padding-bottom: 80px; /* 减小底部内边距，使模块高度变低 (原150px -> 80px) */
+}
+
+.module-3 .content {
+    width: 100%; /* 让内容容器占满宽度，使内部的 .cats-display 能扩展 */
+}
+
+.module-4 {
+    /* 设置模块四背景颜色为 #F2E3B8 */
+    background-color: #F2E3B8;
+    background-image: none;
+    /* background-image: url('../images/bg4.png'); */
+    /* background-size: cover; */
+    /* background-position: center bottom; */
+    /* background-repeat: no-repeat; */
+    color: #fff;
+    position: relative;
+    height: auto; /* 高度自适应 */
+    min-height: 130vh; /* 至少占满一屏，增加高度 (原100vh -> 120vh -> 160vh -> 130vh) */
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 150px; /* 增加底部留白 (原100px) */
+}
+
+.module-5-deco-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.time-bg-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto; /* 改为高度自适应，确保宽度铺满 */
+    z-index: 5; /* 层级：背景(0) < time_bg(5) < 内容(10) */
+    pointer-events: none; /* 不阻挡交互 */
+}
+
+.module-5 {
+    /* 设置模块五背景颜色为 #DB8B58 */
+    background-color: #DB8B58;
+    background-image: none;
+    /* background-image: url('../images/bg5.png'); */
+    /* background-size: cover; */
+    /* background-position: center top; */
+    /* background-repeat: no-repeat; */
+    color: #fff;
+    position: relative;
+    min-height: auto !important; /* 取消固定高度 */
+    height: auto !important; /* 高度自适应 */
+    padding-bottom: 300px; /* 增加底部留白 (原100px -> 300px) */
+    display: flex;
+    flex-direction: column;
+}
+
+.module-6 {
+    /* 设置模块六背景颜色为 #DB8B58 */
+    background-color: #DB8B58;
+    background-image: none;
+    /* background-image: url('../images/bg6.png'); */
+    /* background-size: cover; */
+    /* background-position: center bottom; */
+    /* background-repeat: no-repeat; */
+    color: #fff;
+    position: relative;
+    min-height: 100vh; /* 默认高度 */
+    height: auto;
+    padding-top: 0px; /* 减少顶部内边距，使内容上移 */
+}
+
+.module-6-deco-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.module-6-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 2; /* 在 bg6_1 (z-index: 1) 之上 */
+    pointer-events: none;
+}
+
+/* 电视机播放器容器 */
+/* .tv-player-container 已移除 */
+
+
+/* 模块六文字内容容器 */
+.module-6-text-content {
+    position: relative; /* 改为相对定位 */
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 10px auto 0; /* 减小顶部间距 (原 20px -> 10px) */
+    width: 80%;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.1); /* 轻微背景 */
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
+    padding: 40px;
+    color: #fff;
+    z-index: 10;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 确保 Module 6 使用 Flex 布局来管理这些相对定位的子元素 */
+.module-6 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* 从上到下排列 */
+}
+
+.mod6-title {
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #fff;
+    font-weight: normal; /* 不加粗 */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.mod6-subtitle {
+    font-size: 24px;
+    font-weight: normal; /* 不加粗 */
+    margin-bottom: 30px;
+    color: #f0f0f0;
+}
+
+.mod6-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 30px;
+    text-align: left;
+    display: inline-block;
+    max-width: 90%;
+    color: #fff; /* 列表字体白色 */
+}
+
+.mod6-list li {
+    font-size: 24px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+    color: #fff; /* 确保 li 也是白色 */
+}
+
+.mod6-list .highlight {
+    color: #fff; /* 改为白色 */
+    font-weight: normal;
+    font-size: 24px;
+}
+
+.mod6-conclusion {
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 28px;
+    margin-bottom: 40px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* 移动端适配模块六文字 */
+@media screen and (max-width: 992px) {
+    .module-6-text-content {
+        width: 90%;
+        padding: 25px;
+        margin-top: 10px; /* 移动端调整间距 */
+    }
+
+    .mod6-title {
+        font-size: 24px;
+    }
+
+    .mod6-subtitle {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    .mod6-list li {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .mod6-list .highlight {
+        font-size: 20px;
+    }
+
+    .mod6-conclusion {
+        font-size: 20px;
+        margin-bottom: 25px;
+    }
+
+    .mod6-footer {
+        font-size: 12px;
+    }
+}
+
+/* 模块五社区账号部分样式 */
+.community-wrapper {
+    position: relative;
+    margin: 30px auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 30;
+    width: 80%;
+    max-width: none;
+}
+
+.community-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.community-header {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    width: 100%;
+}
+
+.community-deco {
+    height: auto;
+    width: 7.5vw;
+    max-width: none;
+}
+
+.community-title {
+    font-size: 3vw;
+    color: #fff;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* 模块六头部专用样式 */
+.footer-header-wrapper {
+    position: relative; /* 改为相对定位，防止重叠 */
+    top: auto;
+    left: auto;
+    transform: none;
+    margin-top: 0; /* 移除顶部间距，紧贴顶部 */
+    margin-bottom: 10px; /* 减小下方间距 (原 20px -> 10px) */
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    z-index: 20;
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+/* 移动端适配模块六头部 */
+@media screen and (max-width: 992px) {
+    .footer-header-wrapper {
+        margin-top: 0; /* 移动端移除顶部间距 */
+        /* top: 30px;  Removed old absolute property */
+        width: 95%;
+    }
+    }
+
+
+/* 移动端适配社区账号部分 */
+@media screen and (max-width: 992px) {
+    .community-wrapper {
+        width: 95%;
+        margin-top: 50px; /* 移动端顶部间距也相应减小，从 100px -> 50px */
+    }
+
+    .community-container {
+        width: 100%;
+    }
+
+    .community-title {
+        font-size: 7vw;
+        white-space: nowrap;
+    }
+
+    .community-header {
+        gap: 10px;
+    }
+    
+    .community-deco {
+        height: auto;
+        width: 12.5vw;
+        max-width: none;
+    }
+}
+
+/* 社区账号展示列表样式 */
+.community-items {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12.5%; /* 增大卡片后减小间距 (100% - 25%*3) / 2 = 12.5% */
+    margin-top: 250px; /* 距离标题的间距 */
+    width: 100%;
+    /* 移除 flex-wrap 以保持横向排列 */
+}
+
+.community-item {
+    width: 25%; /* 调整宽度为 25% */
+    height: auto; /* 保持等比例缩放 */
+    max-width: none; /* 移除最大宽度限制 */
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+/* 社区卡片容器样式 (替换原来的 img 标签) */
+.community-card {
+    width: 25%; /* 与 community-item 保持一致 */
+    position: relative; /* 相对定位，作为内容定位的参考 */
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    display: flex; /* 消除 img 下方的空隙 */
+    text-decoration: none; /* 确保作为链接时无下划线 */
+    color: inherit; /* 继承颜色，避免变成链接蓝 */
+    container-type: inline-size; /* 启用容器查询，使子元素字体能根据卡片宽度自适应 */
+}
+
+.community-card:hover,
+.community-item:hover {
+    transform: translateY(-10px); /* 悬停浮动效果 */
+}
+
+.card-bg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 卡片内容覆盖层 */
+.card-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 内容不干扰点击 */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 32%; /* 上移内容：从 38% 减少到 32% */
+    padding-left: 6%;
+    padding-right: 6%;
+    padding-bottom: 6%; /* 底部留白 */
+    box-sizing: border-box;
+}
+
+/* 账号 Handle */
+.card-handle {
+    position: relative; /* 改为相对定位 */
+    top: auto;
+    left: auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 6.5cqw; /* 减小字体 (8 -> 6.5) */
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    letter-spacing: normal;
+    font-weight: bold;
+    width: 100%;
+    white-space: nowrap; /* 禁止换行 */
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    margin-bottom: 2%; /* 与描述文本的间距 */
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+/* 描述文本 */
+.card-desc {
+    position: relative; /* 改为相对定位 */
+    top: auto;
+    left: auto;
+    width: 100%;
+    font-size: 4.5cqw; /* 减小字体 (4.5 -> 3.8) */
+    color: #ffffff;
+    line-height: 1.3;
+    text-align: left; /* 改为左对齐，解决英文间距过大问题 */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: normal;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow: hidden; /* 超出隐藏，防止重叠 */
+    flex-grow: 1; /* 占据剩余空间，将图标推到底部 */
+    margin-bottom: 2%; /* 描述文字与图标的间距 */
+}
+
+/* 左下角图标 */
+.card-icon {
+    position: relative; /* 改为相对定位，加入 Flex 流 */
+    bottom: auto;
+    left: auto;
+    width: 12%;
+    height: auto;
+    flex-shrink: 0; /* 防止图标被压缩 */
+    align-self: flex-start; /* 左对齐 */
+}
+
+/* 移动端适配社区账号列表 */
+@media screen and (max-width: 992px) {
+    .community-items {
+        flex-direction: column; /* 移动端改为垂直排列 */
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .community-item,
+    .community-card {
+        width: 80%; /* 移动端宽度自适应，覆盖PC端的26% */
+        max-width: 80%; 
+    }
+
+    /* 移动端调整字体大小，避免过小 */
+    .card-handle {
+        font-size: 24px; 
+        /* 移除错误的定位偏移，使用 Flex 布局自动排列 */
+        /* top: 42%; */
+        /* left: 6%; */
+    }
+
+    .card-desc {
+        font-size: 16px; /* 增大移动端字体 */
+        /* top: 58%; */
+        /* left: 6%; */
+        width: 100%; /* 调整宽度 */
+        line-height: 1.4;
+    }
+    
+    .card-icon {
+        width: 30px;
+        /* bottom: 6%; */
+        /* left: 6%; */
+        margin-top: auto; /* 推到底部 */
+    }
+}
+
+
+/* 分割线装饰样式 */
+.fenge-decoration {
+    position: absolute;
+    top: 0; /* 贴顶 */
+    left: 50%; /* 居中 */
+    transform: translateX(-50%); /* 水平居中 */
+    width: 100%; /* 宽度占满 */
+    height: auto;
+    z-index: 10; /* 层级 */
+    pointer-events: none;
+}
+
+/* bg3_1 装饰样式 */
+.bg3-1-decoration {
+    position: absolute;
+    bottom: 0; /* 仅位于底部 */
+    left: 50%; /* 居中定位 */
+    transform: translateX(-50%); /* 水平居中 */
+    width: 100%;
+    height: auto; /* 高度自适应 */
+    object-fit: cover;
+    object-position: bottom center; /* 确保内容底部居中 */
+    z-index: 5; /* 背景bg2(0) < bg3_1(5) < 其他内容 */
+    pointer-events: none;
+}
+
+/* 猫咪展示区域样式 */
+.cats-display {
+    display: flex;
+    justify-content: center; /* 居中排列 */
+    align-items: flex-start; /* 顶部对齐，紧贴上方的CA Bar */
+    gap: 100px; /* 图片间距 */
+    width: 100%;
+    height: auto; /* 高度自适应 */
+    position: relative; /* 相对定位，跟随父容器 Flex 布局 */
+    margin-top: 50px; /* 距离上方 CA Bar 的间距 */
+    z-index: 12; 
+    padding-top: 0; 
+    pointer-events: none; /* 让容器不阻挡点击，除非点在猫上 */
+    transition: margin-top 0.3s ease; /* 添加过渡动画 */
+}
+
+.cat-card {
+    position: relative;
+    width: auto;
+    max-width: 20%; /* 限制最大宽度，防止三个猫超出容器 (30% / 1.5 = 20%) */
+    display: flex;
+    justify-content: center;
+}
+
+.cat-item {
+    width: 100%; /* 填满卡片容器 */
+    height: auto;
+    max-height: 400px; /* (600px / 1.5 = 400px) */
+    object-fit: contain;
+    pointer-events: auto; /* 恢复图片的可点击性 */
+    display: block;
+}
+
+.market-label {
+    position: absolute;
+    top: 65%; /* 垂直居中偏下 */
+    left: 50%;
+    transform: translate(-50%, -50%); /* 居中定位 */
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 33px; /* 增大字体 (50px / 1.5 ≈ 33.33px) */
+    color: #ffffff; /* 白色字体 */
+    font-weight: normal;
+    z-index: 2;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* 增加阴影提升可读性 */
+}
+
+/* 市场数据数值样式 */
+.market-value {
+    position: absolute;
+    top: 80%; /* 位于标签下方 */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Arial', sans-serif; /* 使用清晰的数字字体 */
+    font-size: 24px; /* 增大数值字体 (36px / 1.5 = 24px) */
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    z-index: 3;
+    opacity: 0;
+    animation: fadeInValue 0.5s ease forwards;
+}
+
+.text-green {
+    color: #fff; /* 统一改为白色 */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.text-red {
+    color: #fff; /* 统一改为白色 */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+@keyframes fadeInValue {
+    from { opacity: 0; transform: translate(-50%, -40%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* 移动端适配猫咪展示 */
+@media screen and (max-width: 992px) {
+    .cats-display {
+        flex-direction: column; /* 垂直排列 */
+        align-items: center;
+        gap: 20px;
+        padding-top: 20px; /* 调整顶部空间 */
+        overflow-y: auto; /* 防止溢出 */
+    }
+
+    .cat-card {
+        width: 70%; /* 宽度自适应，稍微减小以避免过大 */
+        max-width: 350px; /* 限制最大宽度 */
+    }
+
+    .cat-item {
+        width: 100%;
+        height: auto;
+        max-height: none;
+    }
+
+    .market-label {
+        font-size: 36px; /* 移动端增大字体 */
+        top: 60%; /* 调整移动端位置 */
+    }
+
+    .market-value {
+        font-size: 26px; /* 移动端增大字体 */
+        top: 78%; /* 稍微下移，避免与增大的标题重叠 */
+    }
+}
+
+/* 合约地址和CA Bar 包装容器 - 居中布局 */
+.contract-wrapper {
+    position: relative; /* 改为相对定位，让父容器高度自适应 */
+    margin: 50px auto 0; /* 顶部间距保持，水平居中 */
+    padding: 40px; /* 增加内边距 */
+    padding-bottom: 50px; /* 保持底部留白 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 水平居中对齐 */
+    gap: 20px; /* 垂直间距 */
+    z-index: 30; /* 确保在顶层，高于猫咪等 */
+    width: 95%; /* 宽度占95% */
+    /* max-width: 1200px;  已移除最大宽度限制 */
+    
+    /* 玻璃拟态效果 + 渐变背景 (#56CDB6 -> #28A48C) */
+    background: linear-gradient(135deg, rgba(86, 205, 182, 0.5), rgba(40, 164, 140, 1));
+    /* backdrop-filter: blur(10px); */
+    /* -webkit-backdrop-filter: blur(10px); */
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* CA Bar 样式 */
+.ca-bar-container {
+    /* 移除绝对定位，由 wrapper 控制 */
+    position: relative;
+    top: auto;
+    right: auto;
+    width: auto; /* 自适应宽度 */
+    max-width: 95%; /* 防止溢出 */
+    height: auto; /* 自适应高度 */
+    
+    /* 新样式：CSS 实现圆角矩形背景 */
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.2); /* 半透明背景 */
+    backdrop-filter: blur(5px); /* 毛玻璃效果 */
+    border-radius: 20px; /* 圆角 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* 阴影 */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* 鼠标变手型 */
+    z-index: 20; /* 确保在顶层 */
+    transition: all 0.3s ease;
+    padding: 25px 50px; /* 增加内边距 */
+}
+
+.ca-bar-container:hover {
+    transform: translateY(-3px); /* 悬停上浮 */
+    background-color: rgba(255, 255, 255, 0.3); /* 悬停变亮 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ca-bar-container:active {
+    transform: scale(0.98); /* 点击微缩小 */
+}
+
+.ca-text {
+    color: #fff;
+    font-size: 30px;
+    font-family: 'ZiYouFangHuaTi', sans-serif; /* 使用项目主题字体 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0; /* 移除内边距，由容器控制 */
+}
+
+/* 移动端适配 CA Bar */
+@media screen and (max-width: 992px) {
+    .contract-wrapper {
+        width: 90%; /* 移动端宽度 */
+        gap: 10px; /* 缩小间距 */
+        margin-top: 20px; /* 移动端顶部间距 */
+        top: 0; /* 移除固定距离 */
+    }
+
+    .ca-bar-container {
+        position: relative; /* 移动端改为流式布局或相对定位 */
+        top: auto;
+        right: auto;
+        width: 100%; /* 宽度自适应 wrapper */
+        height: auto;
+        padding: 15px 20px;
+        margin-top: 0; /* 由 wrapper gap 控制 */
+    }
+
+    .ca-text {
+        font-size: 14px; /* 移动端缩小字号以显示完整地址 */
+    }
+}
+
+/* 模块四样式 (这里实际上是模块三的合约地址部分，类名可能沿用了之前的逻辑) */
+.contract-container {
+    /* 移除绝对定位，由 wrapper 控制 */
+    position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    width: 100%; /* 宽度占满 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 内容居中对齐 */
+    justify-content: flex-start;
+    padding-bottom: 0;
+    z-index: 15; /* 层级高于 bg3_1 */
+}
+
+.contract-header {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.contract-deco {
+    height: auto;
+    width: 7.5vw; /* 缩小1倍 (原 15vw) */
+    max-width: none;
+}
+
+.contract-title {
+    font-size: 3vw; /* 缩小1倍 (原 6vw) */
+    color: #fff;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+
+
+/* 修正：副标题相对于整个容器居中可能在左上角看起来奇怪，尝试让它相对于标题居中 */
+.contract-subtitle {
+    font-size: 60px;
+    color: #fff;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    margin-top: 10px;
+    align-self: center; /* 让副标题在flex容器中居中（相对于header宽度） */
+}
+
+/* 移动端适配合约地址 */
+@media screen and (max-width: 992px) {
+    .contract-container {
+        /* 移除旧的定位，使用 wrapper */
+        top: auto;
+        left: auto;
+        width: 100%;
+        align-items: center; 
+    }
+
+    .contract-title {
+        font-size: 7vw; /* 缩小1倍 (原 14vw) */
+        white-space: nowrap;
+    }
+
+    .contract-header {
+        gap: 10px;
+    }
+    
+    .contract-subtitle {
+        font-size: 24px;
+        align-self: center;
+    }
+    
+    .contract-deco {
+        height: auto;
+        width: 12.5vw; /* 缩小1倍 (原 25vw) */
+        max-width: none;
+        gap: 10px;
+    }
+}
+
+/* 模块四历史部分样式 */
+.time-bg-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 0;
+}
+
+.history-header {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    z-index: 10;
+    background: transparent;
+    pointer-events: none;
+}
+
+.history-title {
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 3vw;
+    color: #C07C59;
+    font-weight: normal;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.history-deco {
+    height: auto;
+    width: 7.5vw;
+    max-width: none;
+    display: block;
+}
+
+/* 移动端适配 (History, About, etc.) */
+@media screen and (max-width: 992px) {
+    /* Module 4 Container */
+    .module-4 {
+        display: flex;
+        flex-direction: column;
+        height: auto !important; /* Allow content to dictate height */
+        min-height: 100vh;
+    }
+
+    /* History */
+    .time-bg-decoration {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: auto;
+        margin-top: 10px; /* 位于标题下方 */
+        z-index: 1;
+        order: 2; /* 排在标题之后 */
+    }
+
+    .history-header {
+        position: relative; /* 改为相对定位，进入文档流 */
+        top: auto;
+        left: auto;
+        width: 100%; 
+        transform: none;
+        justify-content: center; 
+        gap: 10px; /* 增加移动端间距 */
+        margin-top: 0; /* 顶部间距减少 */
+        margin-bottom: 10px;
+        z-index: 2;
+        order: 1; /* 排在最前 */
+    }
+
+    .content {
+        order: 3;
+    }
+
+    .timeline-decoration {
+        order: 4;
+    }
+
+    .history-title {
+        font-size: 7vw; 
+    }
+    
+    .history-deco {
+        height: auto;
+        width: 12.5vw;
+        max-width: none;
+    }
+
+    /* About */
+    .about-title-deco {
+        width: 60%; /* 图片自适应宽度 */
+        max-width: 300px;
+        height: auto;
+        aspect-ratio: 3 / 1; /* 假设图片的宽高比，防止塌陷 */
+        background-size: 100% 100%;
+        padding: 0; /* 移除固定内边距 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .about-title {
+        font-size: 40px;
+        margin: 0; /* 移除边距以居中 */
+        z-index: 1; /* 确保文字在背景之上 */
+    }
+}
+
+/* 模块四右侧时间轴装饰 - 改为 Flex 布局 */
+.timeline-decoration {
+    position: relative; /* 相对定位，参与文档流撑开高度 */
+    width: 100%;
+    height: auto;
+    margin-top: 250px; /* 顶部留出更多空间 (原150px) 给标题，防止遮挡 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px; /* 节点之间的间距 */
+    z-index: 10;
+    pointer-events: none; /* 容器本身不阻挡交互 */
+}
+
+.timeline-line {
+    position: absolute;
+    top: 270px; /* 距离顶部 270px */
+    bottom: 180px; /* 距离底部 180px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px; /* 线条加粗 */
+    background-color: #7D3A03; /* 设置颜色 */
+    z-index: 1;
+    border-radius: 4px; /* 让线条两端圆润一些 */
+}
+
+/* 时间轴节点行容器 */
+.timeline-row {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; /* 每一行的最小高度 */
+}
+
+.timeline-coin {
+    position: relative; /* 相对定位 */
+    z-index: 2;
+    width: auto; 
+    max-width: 80px;
+    height: auto;
+    margin: 0; /* 确保无边距影响居中 */
+    display: block; /* 块级显示 */
+    pointer-events: auto; /* 恢复鼠标交互 */
+    cursor: ns-resize; /* 提示可上下拖动 */
+}
+
+/* 时间标签包装器样式 */
+.timeline-label-wrapper {
+    position: absolute;
+    z-index: 3;
+    width: 649px; /* 图片原始宽度 */
+    height: 211px; /* 图片原始高度 */
+    min-width: auto; 
+    max-width: none;
+    min-height: auto;
+    background-image: url('/images/time.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    top: 50%;
+    transform: translateY(-50%); /* 垂直居中 */
+}
+
+/* 右侧标签 */
+.label-right {
+    left: 50%;
+    margin-left: 80px; /* 增大间距，防止与图标重叠 (图标半宽约40px + 间距40px) */
+}
+
+/* 左侧标签 */
+.label-left {
+    right: 50%;
+    margin-right: 80px; /* 增大间距，防止与图标重叠 */
+}
+
+/* 时间标签内的文本内容 */
+.timeline-text-content {
+    width: 100%;
+    height: 100%; /* 占满卡片高度 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 50px; /* 减小上下内边距 */
+    box-sizing: border-box;
+    color: #ffffff;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    text-align: left;
+    overflow: hidden; /* 防止溢出 */
+}
+
+.timeline-date {
+    font-size: 22px; /* 减小字体 */
+    margin-bottom: 6px; /* 微调间距 */
+    font-weight: bold;
+    line-height: 1.4;
+    letter-spacing: 1px;
+}
+
+.timeline-desc p {
+    font-size: 22px; /* 减小字体 */
+    margin: 6px 0;
+    line-height: 1.4;
+    white-space: normal;
+    letter-spacing: 1px;
+}
+
+/* 移动端适配时间轴 */
+@media screen and (max-width: 992px) {
+    .timeline-decoration {
+        display: flex; /* 显示时间轴 */
+        margin-top: 200px; /* 增加顶部间距，防止被标题遮挡 */
+        gap: 30px;
+    }
+
+    .timeline-line {
+        left: 40px; /* 线条中心定位 */
+        transform: translateX(-50%); /* 居中对齐 */
+    }
+
+    .timeline-row {
+        flex-direction: column; /* 垂直排列 */
+        align-items: flex-start; /* 左对齐 */
+        min-height: auto;
+        padding-left: 80px; /* 为左侧线条和图标留出更多空间 */
+        margin-bottom: 30px;
+    }
+
+    .timeline-coin {
+        position: absolute;
+        left: 40px; /* 图标中心定位，与线条对齐 */
+        top: 50%; /* 垂直居中于父容器(文本框高度) */
+        transform: translate(-50%, -50%); /* 水平垂直都居中 */
+        width: 40px; /* 缩小图标 */
+        z-index: 5;
+    }
+
+    .timeline-label-wrapper {
+        position: relative; /* 相对定位 */
+        top: auto;
+        left: auto !important;
+        right: auto !important;
+        transform: none;
+        width: 100%; /* 移动端占满剩余空间 */
+        max-width: 500px; /* 限制最大宽度 */
+        height: auto;
+        aspect-ratio: auto; /* 移动端不强制比例，随内容撑开 */
+        min-width: unset;
+        margin: 0;
+        padding: 15px;
+        background-size: 100% 100%; /* 背景拉伸适应 */
+    }
+
+    .label-right, .label-left {
+        margin: 0; /* 清除边距 */
+    }
+
+    .timeline-text-content {
+        padding: 20px 30px; /* 减小内边距 */
+    }
+
+    .timeline-date {
+        font-size: 16px; /* 减小字体，与内容一致 */
+        line-height: 1.5;
+    }
+
+    .timeline-desc p {
+        font-size: 16px; /* 减小字体 */
+    }
+}
+
+/* 移动端自适应 */
+@media screen and (max-width: 992px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* 移动端 Logo 依然在左 */
+    .logo {
+        flex-grow: 0;
+    }
+
+    /* 移动端菜单隐藏，变为全屏或侧滑 */
+    .nav-menu {
+        position: fixed;
+        top: 73px; /* 匹配新的导航栏高度 */
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 73px);
+        background-color: #2c3e50;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 0;
+        padding-top: 40px;
+        overflow-y: auto;
+        
+        /* 修改动画为淡入/下滑，而不是从左侧滑入 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-menu > li {
+        margin: 15px 0;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* 移动端导航链接样式调整 */
+    .nav-link {
+        font-size: 26px; /* 移动端增大字体 (原22px) */
+        justify-content: center;
+        display: inline-flex; /* 使用 inline-flex 让边框包裹文字 */
+        padding: 8px 20px; /* 调整内边距，参考网页版，不宜过大 */
+        border: 1.5px solid transparent; /* 减小边框厚度，避免过于厚重 */
+    }
+    
+    /* 移动端悬停/激活样式 */
+    .nav-link:hover,
+    .has-submenu.active > .nav-link {
+        border: 1.5px solid #fff; /* 恢复实心白边框 */
+        background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变 */
+        border-radius: 50px;
+    }
+    
+    /* 移动端显示下拉箭头 */
+    .nav-link i {
+        display: inline-block; /* 确保图标显示 */
+        margin-left: 8px;
+        font-size: 16px;
+        transition: transform 0.3s ease; /* 三角形旋转动画 */
+    }
+    
+    /* 当子菜单激活时，旋转三角形 */
+    .has-submenu.active > .nav-link i {
+        transform: rotate(180deg);
+    }
+    
+    /* 移动端右侧语言切换显示 */
+    .nav-right {
+        display: flex; /* 在移动端显示 */
+        margin-right: 15px; /* 与汉堡菜单保持间距 */
+    }
+
+    .lang-switch {
+        padding: 4px 12px; /* 稍微减小内边距 */
+        font-size: 16px; /* 稍微减小字体 */
+    }
+    
+    .lang-dropdown {
+        top: 120%; /* 增加下拉菜单距离，防止遮挡 */
+        width: 120px; /* 调整下拉菜单宽度 */
+    }
+
+    .lang-dropdown li {
+        font-size: 16px; /* 调整下拉菜单字体 */
+        padding: 10px 15px;
+    }
+    
+    /* 移动端子菜单 */
+    .submenu {
+        position: static;
+        transform: none;
+        background-color: rgba(0,0,0,0.2);
+        background-image: none;
+        width: 100%;
+        box-shadow: none;
+        display: none;
+        margin-top: 0;
+        padding: 10px 0;
+        border-radius: 0;
+    }
+    
+    .has-submenu:hover .submenu {
+        display: none; /* 禁用 hover 显示 */
+    }
+    
+    /* 移动端点击显示子菜单，无动画 */
+    .has-submenu.active .submenu {
+        display: block;
+        animation: none; /* 禁用 fadeIn 动画 */
+    }
+    
+    /* 移动端子菜单项样式 */
+    .submenu li a {
+        display: inline-block; /* 让子菜单项也是适应内容宽度 */
+        margin: 5px 0;
+        padding: 8px 20px; /* 减小一点 padding */
+        font-size: 16px;
+        text-align: center; /* 确保文字居中 */
+    }
+    
+    /* 移动端关于部分适配 */
+    .module-2 {
+        height: auto !important; /* 让高度由内容决定 */
+        min-height: 500px; /* 给一个最小高度 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cat-paw-decoration {
+        position: absolute; /* 变为绝对定位背景 */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 覆盖整个区域 */
+        z-index: 25;
+    }
+
+    .about-container {
+        position: relative; /* 变为相对定位，撑开模块高度 */
+        top: auto;
+        left: auto;
+        width: 100%;
+        height: auto;
+        min-height: 100%; /* 确保占满模块高度 */
+        flex: 1; /* Flex 伸缩 */
+        padding: 80px 20px 40px; /* 增加底部内边距 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* 移动端按钮置底 */
+    .about-container .create-btn {
+        margin-top: auto; /* 自动推到最底部 */
+        padding: 12px 30px; /* 缩小内边距 */
+        font-size: 18px;    /* 缩小字体 */
+        border-width: 2px;  /* 缩小边框 */
+        gap: 8px;           /* 缩小间距 */
+        border-radius: 40px; /* 调整圆角 */
+    }
+
+    .about-container .create-btn img {
+        width: 20px;        /* 缩小图标 */
+    }
+
+    .about-header {
+        gap: 10px;
+    }
+
+    .about-title {
+        font-size: 14vw;
+        margin: 0;
+        white-space: nowrap;
+    }
+    
+    .about-text {
+        font-size: 30px; /* 调大正文 */
+        margin-bottom: 20px;
+        line-height: 1.4;
+        padding: 0 10px;
+    }
+
+    .about-deco {
+        height: auto;
+        width: 25vw;
+        max-width: none;
+    }
+}
+
+/* 加载页面样式 */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff8f0; /* 与主题色匹配的背景 */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loader-logo {
+    width: 150px; /* 稍微调大loading图片 */
+    height: auto;
+    animation: bounce 2s infinite;
+}
+
+/* 进度条样式 */
+.progress-container {
+    width: 300px;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #C07C59; /* 主题色 */
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-family: 'Arial', sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #C07C59;
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   English Adaptation (i18n)
+   ========================================================================== */
+html[lang="en"] .nav-link {
+    font-size: 24px; /* English text is longer, reduce font size */
+}
+
+html[lang="en"] .nav-menu > li {
+    margin: 0 15px; /* Reduce spacing for English */
+}
+
+/* Ensure language switch doesn't get pushed off or shrunk */
+.nav-right {
+    flex-shrink: 0;
+    min-width: fit-content;
+    margin-left: 10px; /* Add some safety margin */
+}
+
+/* Prevent nav-menu from forcing width that pushes right side out */
+.nav-menu {
+    min-width: 0; /* Allow flex item to shrink below content size if absolutely necessary */
+}
+
+.loader-subtext {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* 移动端适配进度条 */
+@media screen and (max-width: 768px) {
+    .progress-container {
+        width: 200px;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-20px);}
+    60% {transform: translateY(-10px);}
+}
+
+/* 模块六 Z系列装饰 */
+.z-decoration-group {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0; /* 在 bg6_1 (z-index: 1) 之下 */
+    overflow: hidden;
+}
+
+.z-deco {
+    position: absolute;
+    height: auto;
+}
+
+/* 根据红框位置大概分布在右下角 */
+/* 客户端整体左移：增加 right 值 */
+/* 使用 vw 单位替代 %，确保与 bg6_1 (width:100%) 同步缩放 */
+.z1 {
+    right: 38vw;
+    bottom: 3vw;
+    /* width: 10vw; */
+    /* min-width: 100px; */
+}
+
+.z2 {
+    right: 30vw;
+    bottom: 6vw;
+    /* width: 8vw; */
+    /* min-width: 80px; */
+}
+
+.z3 {
+    right: 18vw;
+    bottom: 5vw;
+    /* width: 12vw; */
+    /* min-width: 120px; */
+}
+
+.z4 {
+    right: 8vw;
+    bottom: 7vw;
+    /* width: 9vw; */
+    /* min-width: 90px; */
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+    /* 移动端居中分布，并应用相同的底部错落感 */
+    /* 增加间距防止重叠，并设置宽度实现等比例缩放 */
+    /* 底部贴近边缘：使用较小的 vw 值 */
+    /* 水平间距也使用 vw，确保完全适配 */
+    .z1 { 
+        right: auto; 
+        left: 5vw; 
+        bottom: 3vw; 
+        width: 18vw; 
+    }
+    .z2 { 
+        right: auto; 
+        left: 28vw; 
+        bottom: 0.5vw; 
+        width: 16vw; 
+    }
+    .z3 { 
+        right: auto; 
+        left: 51vw; 
+        bottom: 4vw; 
+        width: 20vw; 
+    }
+    .z4 { 
+        right: auto; 
+        left: 75vw; 
+        bottom: 1.5vw; 
+        width: 17vw; 
+    }
+}
+
+/* 模块7样式 */
+.module-7 {
+    background-color: #EA9D6C;
+    height: auto;
+    min-height: 200px; /* 较小的高度 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.module-7 .content-container {
+    max-width: 1200px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.module-7-text {
+    color: #fff;
+    font-family: sans-serif; /* 使用系统字体 */
+    line-height: 1.6;
+    margin: 0;
+}
+
+.module-7-text.text-primary {
+    font-size: 24px;
+    font-weight: normal; /* 不加粗 */
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.module-7-text.text-secondary {
+    font-size: 16px;
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 768px) {
+    .module-7 {
+        padding: 30px 20px;
+    }
+    
+    .module-7-text.text-primary {
+        font-size: 18px;
+    }
+    
+    .module-7-text.text-secondary {
+        font-size: 14px;
+    }
+}
+
+/* Footer */
+.simple-footer {
+    text-align: center;
+    padding: 20px;
+    background: #333;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* ��������Ӧʽ���� - ����С */
+@media screen and (max-width: 1700px) {
+    .nav-menu > li {
+        margin: 0 30px; /* ��С��� 40px -> 30px */
+    }
+    .nav-link {
+        font-size: 32px; /* ��С���� 36px -> 32px */
+    }
+}
+
+@media screen and (max-width: 1450px) {
+    .nav-menu > li {
+        margin: 0 20px; /* ��С��� 30px -> 20px */
+    }
+    .nav-link {
+        font-size: 28px; /* ��С���� 32px -> 28px */
+    }
+    .logo img {
+        height: 60px; /* ��С Logo */
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .nav-menu > li {
+        margin: 0 15px; /* ��С��� */
+    }
+    .nav-link {
+        font-size: 24px; /* ��С���� */
+        padding: 6px 15px; /* ��С�ڱ߾� */
+    }
+    .logo img {
+        height: 50px; /* ��С Logo */
+    }
+    .lang-switch {
+        padding: 4px 12px;
+        font-size: 16px;
+    }
+}
+

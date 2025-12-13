@@ -1,0 +1,859 @@
+/* Hajimi Beneficence Specific Styles */
+
+:root {
+    --primary-color: #ff9a9e;
+    --secondary-color: #fad0c4;
+    --text-color: #333;
+    --bg-color: #fff;
+    --card-bg: #fff;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+body {
+    background-color: #f9f9f9; /* Light background for the whole page */
+    /* 使用系统默认字体 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* 注册自定义字体 */
+@font-face {
+    font-family: 'ZiYouFangHuaTi';
+    src: url('/assets/ZiYouFangHuaTi.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 顶部导航栏保留原有的特殊字体 */
+.navbar {
+    background-color: rgba(0, 0, 0, 0.3); /* 淡灰色(黑透)毛玻璃背景 */
+    backdrop-filter: blur(10px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(10px);
+    height: 90px; /* 设置导航栏高度为 90px，与主官网一致 */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s ease;
+    padding: 0 20px; /* Match Avatar page padding */
+    /* 显式指定导航栏字体，确保不被 body 覆盖 */
+    font-family: 'ZiYouFangHuaTi', 'AlimamaFangYuanTi', 'Arial', 'Microsoft YaHei', sans-serif;
+}
+
+/* 导航栏内部容器特殊处理 - 匹配主官网布局 */
+.navbar .container {
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+/* 滚动后的导航栏样式 */
+.navbar.scrolled {
+    background-image: none; /* 移除背景图片 */
+    background-color: rgba(0, 0, 0, 0.5); /* 滚动后加深颜色 */
+    backdrop-filter: blur(15px); /* 毛玻璃模糊效果 */
+    -webkit-backdrop-filter: blur(15px); /* 兼容 Safari */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    height: 90px; /* 滚动后高度保持 90px */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 左侧 Logo */
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 70px;
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.1);
+}
+
+/* 中间导航菜单 */
+.nav-menu {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* 让菜单占据剩余空间 */
+    margin: 0 20px;
+}
+
+.nav-menu > li {
+    margin: 0 25px; /* 调整间距 */
+    position: relative;
+}
+
+/* 导航链接样式 */
+.nav-link {
+    text-decoration: none;
+    color: #fff;
+    font-size: 36px; /* 增大字体大小 (原20px) */
+    font-weight: normal; /* 去除加粗 */
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    /* 确保使用自定义字体 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; 
+}
+
+/* 悬停效果 - 椭圆框 + 内部白色渐变 */
+.nav-link:hover {
+    border: 2px solid #fff; /* 边框保持实心白色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border-radius: 50px;
+}
+
+/* 电脑端隐藏下拉箭头 */
+@media screen and (min-width: 993px) {
+    .nav-link i {
+        display: none;
+    }
+}
+
+/* --- 子菜单样式 (仿图二) --- */
+.submenu {
+    display: none;
+    position: absolute;
+    top: 100%; /* 父元素下方 */
+    left: 50%;
+    transform: translateX(-50%); /* 水平居中 */
+    
+    /* 蓝色卡片背景 */
+    background-color: #2D9CDB; /* 类似图中的蓝色，也可以吸管取色 */
+    background-image: linear-gradient(to bottom, #3498db, #2980b9); /* 可选渐变 */
+    
+    min-width: 140px; /* 宽度适中 */
+    border-radius: 10px; /* 圆角 */
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 10px; /* 距离父级一点距离 */
+    
+    /* 小三角 (可选，如果需要) */
+}
+
+/* 增加一个透明的伪元素桥梁，防止鼠标移出链接时子菜单立刻消失 */
+.submenu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+/* 显示子菜单 */
+.has-submenu:hover .submenu {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.submenu li {
+    margin: 0;
+    text-align: center; /* 内容居中 */
+}
+
+.submenu li a {
+    display: block;
+    padding: 12px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: normal; /* 去除加粗 */
+    font-family: 'ZiYouFangHuaTi', sans-serif; /* 子菜单也用该字体 */
+    transition: background 0.3s;
+    border: 1px solid transparent; /* 预留边框位置，防止抖动 */
+}
+
+/* 子菜单项悬停 (椭圆框边框效果) */
+.submenu li a:hover {
+    background-color: transparent; /* 移除背景色 */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变效果 */
+    border: 1px solid #fff; /* 添加白色边框 */
+    border-radius: 50px; /* 椭圆效果 */
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 右侧区域 (语言切换) */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* 语言切换按钮 */
+.lang-switch {
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 30px; /* 加大圆角以适应更大字体 */
+    padding: 5px 20px;
+    cursor: pointer;
+    font-size: 30px; /* 增大字体大小，与社区(导航链接)一致 */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    transition: all 0.3s ease;
+    position: relative; /* 为下拉菜单定位 */
+    justify-self: auto; /* 重置 grid 属性 */
+}
+
+.lang-switch:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* 语言下拉菜单 */
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%; /* 紧贴父元素底部 */
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    background-color: #2D9CDB;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    min-width: 140px; /* 增加宽度 */
+    border-radius: 10px;
+    padding: 10px 0;
+    list-style: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-top: 15px; /* 使用 margin 制造视觉间距 */
+    z-index: 2000; /* 提高层级，确保在最上层 */
+}
+
+/* 增加透明桥梁防止鼠标移出消失 */
+.lang-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -20px; /* 向上延伸覆盖 margin-top 的间隙 */
+    left: 0;
+    width: 100%;
+    height: 25px; /* 高度足够覆盖间隙 */
+}
+
+/* 显示语言下拉菜单 */
+.lang-switch:hover .lang-dropdown,
+.lang-switch.active .lang-dropdown {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.lang-dropdown li {
+    padding: 12px 20px; /* 增加内边距 */
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+    font-family: 'ZiYouFangHuaTi', sans-serif;
+    font-size: 30px; /* 增大字体，与子菜单一致 */
+    border: 1px solid transparent;
+    border-radius: 50px;
+    margin: 5px 10px;
+}
+
+.lang-dropdown li:hover {
+    background-color: transparent;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+    border: 1px solid #fff;
+}
+
+/* 汉堡菜单 (默认隐藏) */
+.menu-toggle {
+    display: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* 语言箭头旋转动画 */
+.lang-arrow { display: inline-block; transition: transform .2s ease; }
+.lang-switch.open .lang-arrow { transform: rotate(180deg); }
+
+/* Logo Hover Effect */
+.logo img {
+    transition: transform 0.3s ease;
+}
+.logo:hover img {
+    transform: scale(1.1);
+}
+
+/* Header Section */
+.charity-header {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    margin-top: 0; /* Align to top */
+    color: #fff;
+    /* 背景图 */
+    background: url('images/beneficence_banner.jpg') no-repeat center center;
+    background-size: cover;
+    background-color: #ff9a9e; /* Fallback */
+}
+/* 当前背景较亮，白色文字可能看不清，加阴影或者改颜色 */
+.main-title {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    /* 渐变字体: 白 -> 粉 */
+    background: linear-gradient(to bottom, #ffffff 30%, #ff9a9e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* 保持阴影以确保在亮背景上可见，但需注意 text-shadow 在某些浏览器与 transparent color 的兼容性 */
+    /* 使用 drop-shadow 滤镜替代 text-shadow 以获得更好的兼容性 */
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    text-shadow: none;
+    font-weight: bold;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
+.header-content {
+    z-index: 1;
+    padding: 20px;
+    animation: fadeInUp 1s ease-out;
+}
+
+.divider img {
+    width: 40px;
+    height: auto;
+    animation: bounce 2s infinite;
+}
+
+/* Intro Section */
+.intro-section {
+    padding: 60px 20px;
+    background: #fff;
+    margin-top: -50px; /* Overlap header */
+    border-radius: 20px;
+    position: relative;
+    z-index: 2;
+    box-shadow: var(--shadow);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-card {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.intro-text {
+    flex: 1;
+}
+
+.intro-text h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.intro-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.intro-image {
+    flex: 1;
+    text-align: center;
+}
+
+.intro-image img {
+    max-width: 100%;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    /* transition: transform 0.3s ease; */
+}
+
+/* .intro-image img:hover {
+    transform: scale(1.02);
+} */
+
+/* Projects Section */
+.projects-section {
+    padding: 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.section-title h2 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+}
+
+.section-title img {
+    height: 30px;
+}
+
+.project-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.project-card {
+    display: flex;
+    flex-direction: row;
+    background: var(--card-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 240px;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card-image {
+    position: relative;
+    width: 40%;
+    min-height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* transition: transform 0.5s ease; */
+}
+
+/* .project-card:hover .card-image img {
+    transform: scale(1.1);
+} */
+
+.tag {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: #999; /* Default gray */
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.tag.ongoing {
+    background: #51cf66; /* Green */
+}
+
+.tag.completed {
+    background: #ff6b6b; /* Red */
+}
+
+.tag.preparation {
+    background: #fcc419; /* Yellow */
+    color: #333; /* Dark text for yellow bg */
+}
+
+.card-body {
+    padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative; /* Ensure tag is positioned relative to card-body */
+}
+
+.card-body h3 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.card-body .desc {
+    color: #777;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 80px; /* Increased margin to prevent overlap with absolute actions */
+    min-height: 3em; /* Align cards */
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.btn-detail {
+    background: transparent;
+    border: 1px solid #333;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-detail:hover {
+    background: #333;
+    color: #fff;
+}
+
+.duration {
+    color: #888;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+.duration i {
+    color: #ff9a9e;
+}
+
+/* CTA Section */
+.cta-section {
+    position: relative;
+    text-align: center;
+    padding: 80px 20px;
+    overflow: hidden;
+    color: #333;
+}
+
+.cta-bg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.cta-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.cta-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.donation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px; /* Add top margin */
+    flex-wrap: wrap;
+}
+
+.donation-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+
+.donation-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    color: var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.donation-btn:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.donation-btn.copied {
+    background: #51cf66;
+    color: #fff;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 15px 40px;
+    background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
+}
+
+/* Footer */
+.simple-footer {
+    text-align: center;
+    padding: 20px;
+    background: #333;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-title { font-size: 2.5rem; }
+    .intro-card { flex-direction: column; }
+    .intro-text { text-align: center; }
+    .header-bg { object-position: center; }
+
+    /* Stack cards vertically on mobile */
+    .project-card {
+        flex-direction: column;
+    }
+    .card-image {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+/* 导航栏响应式适配 (从主站同步) */
+@media screen and (max-width: 1700px) {
+    .nav-menu > li {
+        margin: 0 30px; /* 减小间距 */
+    }
+    .nav-link {
+        font-size: 32px; /* 稍微减小字体 */
+    }
+}
+
+@media screen and (max-width: 1450px) {
+    .nav-menu > li {
+        margin: 0 15px; /* 进一步减小间距 */
+    }
+    .nav-link {
+        font-size: 26px; /* 减小字体 */
+        padding: 5px 10px;
+    }
+    .logo img {
+        height: 60px; /* 缩小 Logo */
+    }
+    .lang-switch {
+        font-size: 24px;
+        padding: 4px 15px;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .navbar .container {
+        padding: 0 10px;
+    }
+    .nav-menu {
+        margin: 0 10px;
+    }
+    .nav-menu > li {
+        margin: 0 10px;
+    }
+    .nav-link {
+        font-size: 22px;
+    }
+    .logo img {
+        height: 50px;
+    }
+    .lang-switch {
+        font-size: 20px;
+        padding: 3px 10px;
+    }
+}
+
+/* 移动端自适应 */
+@media screen and (max-width: 992px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    /* 移动端 Logo 依然在左 */
+    .logo {
+        flex-grow: 0;
+    }
+
+    /* 移动端菜单隐藏，变为全屏或侧滑 */
+    .nav-menu {
+        position: fixed;
+        top: 90px; /* 匹配新的导航栏高度 (90px) */
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 90px);
+        background-color: #2c3e50;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 0;
+        padding-top: 40px;
+        overflow-y: auto;
+        
+        /* 修改动画为淡入/下滑，而不是从左侧滑入 */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-menu > li {
+        margin: 15px 0;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* 移动端导航链接样式调整 */
+    .nav-link {
+        font-size: 26px; /* 移动端增大字体 (原22px) */
+        justify-content: center;
+        display: inline-flex; /* 使用 inline-flex 让边框包裹文字 */
+        padding: 8px 20px; /* 调整内边距，参考网页版，不宜过大 */
+        border: 1.5px solid transparent; /* 减小边框厚度，避免过于厚重 */
+    }
+    
+    /* 移动端悬停/激活样式 */
+    .nav-link:hover,
+    .has-submenu.active > .nav-link {
+        border: 1.5px solid #fff; /* 恢复实心白边框 */
+        background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.3)); /* 内部白色渐变 */
+        border-radius: 50px;
+    }
+    
+    /* 移动端显示下拉箭头 */
+    .nav-link i {
+        display: inline-block; /* 确保图标显示 */
+        margin-left: 8px;
+        font-size: 16px;
+        transition: transform 0.3s ease; /* 三角形旋转动画 */
+    }
+    
+    /* 当子菜单激活时，旋转三角形 */
+    .has-submenu.active > .nav-link i {
+        transform: rotate(180deg);
+    }
+    
+    /* 移动端右侧语言切换显示 */
+    .nav-right {
+        display: flex; /* 在移动端显示 */
+        margin-right: 15px; /* 与汉堡菜单保持间距 */
+    }
+
+    .lang-switch {
+        padding: 4px 12px; /* 稍微减小内边距 */
+        font-size: 16px; /* 稍微减小字体 */
+    }
+    
+    .lang-dropdown {
+        top: 120%; /* 增加下拉菜单距离，防止遮挡 */
+        width: 120px; /* 调整下拉菜单宽度 */
+    }
+
+    .lang-dropdown li {
+        font-size: 16px; /* 调整下拉菜单字体 */
+        padding: 10px 15px;
+    }
+    
+    /* 移动端子菜单 */
+    .submenu {
+        position: static;
+        transform: none;
+        background-color: rgba(0,0,0,0.2);
+        background-image: none;
+        width: 100%;
+        box-shadow: none;
+        display: none;
+        margin-top: 0;
+        padding: 10px 0;
+        border-radius: 0;
+    }
+    
+    .has-submenu:hover .submenu {
+        display: none; /* 禁用 hover 显示 */
+    }
+    
+    /* 移动端点击显示子菜单，无动画 */
+    .has-submenu.active .submenu {
+        display: block;
+        animation: none; /* 禁用 fadeIn 动画 */
+    }
+    
+    /* 移动端子菜单项样式 */
+    .submenu li a {
+        display: inline-block; /* 让子菜单项也是适应内容宽度 */
+        margin: 5px 0;
+        padding: 8px 20px; /* 减小一点 padding */
+        font-size: 16px;
+        text-align: center; /* 确保文字居中 */
+    }
+}

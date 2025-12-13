@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hajimi 慈善公益 - Hajimi Beneficence</title>
+    <link rel="icon" href="/images/webc.png" type="image/png">
+    
+    <!-- 引入主站样式 (复用导航栏和基础样式) -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/toast.css">
+    
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 本页专属样式 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="top"></div>
+
+    <!-- 加载页面 (保持一致体验) -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <img src="/images/loading.png" alt="Loading..." class="loader-logo">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0%</div>
+        </div>
+    </div>
+    <script>
+        // 立即执行：检查缓存，如果有缓存则直接隐藏，防止闪烁
+        (function() {
+            if (localStorage.getItem('hajimi_beneficence_visited')) {
+                var loader = document.getElementById('loading-screen');
+                if (loader) loader.style.display = 'none';
+            }
+        })();
+
+        // 加载动画逻辑
+        (function(){
+            var loader = document.getElementById('loading-screen');
+            // 如果loader被隐藏了，就不跑逻辑了
+            if (!loader || loader.style.display === 'none') return;
+
+            var progressBar = document.getElementById('progress-bar');
+            var progressText = document.getElementById('progress-text');
+            var progress = 0;
+            var loadInterval;
+
+            // 启动进度条动画
+            function startLoading() {
+                loadInterval = setInterval(function() {
+                    // 随机增加进度，模拟真实感
+                    var increment = Math.random() * 5; 
+                    progress += increment;
+                    
+                    // 在页面完全加载前，限制在 90%
+                    if (document.readyState !== 'complete' && progress > 90) {
+                        progress = 90;
+                    }
+                    
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(loadInterval);
+                        finishLoading();
+                    }
+                    
+                    updateUI(progress);
+                }, 100);
+            }
+
+            function updateUI(val) {
+                var p = Math.floor(val);
+                if (progressBar) progressBar.style.width = p + '%';
+                if (progressText) progressText.innerText = p + '%';
+            }
+
+            function finishLoading() {
+                setTimeout(function() {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        localStorage.setItem('hajimi_beneficence_visited', 'true');
+                    }, 500);
+                }, 200);
+            }
+
+            // 开始动画
+            startLoading();
+
+            // 监听页面加载完成
+            window.addEventListener('load', function() {
+                // 页面加载完成后，快速跑完剩余进度
+                clearInterval(loadInterval);
+                loadInterval = setInterval(function() {
+                    progress += 5; 
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(loadInterval);
+                        updateUI(progress);
+                        finishLoading();
+                    } else {
+                        updateUI(progress);
+                    }
+                }, 20);
+            });
+        })();
+    </script>
+
+    <!-- 顶部导航栏 (标准化结构) -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <!-- 左侧区域：Logo -->
+            <a href="/" class="logo">
+                <img src="/images/logo.png" alt="HAJIMI">
+            </a>
+
+            <!-- 中间区域：导航链接 -->
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link" data-i18n="nav_home">首页</a></li>
+                <li><a href="https://hajimi-theta.vercel.app/" target="_blank" class="nav-link" data-i18n="nav_culture">哈基米文化</a></li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_ecosystem">哈基米生态</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="#" onclick="showPopup(event)" data-i18n="nav_concert">音乐会</a></li>
+                        <li><a href="/external_web/hajimi_emoji/emoji.html" data-i18n="nav_emoji">头像</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_foundation">基金会</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="/external_web/hajimi_beneficence/index.html" data-i18n="nav_charity">慈善</a></li>
+                        <li><a href="/external_web/hajimi_events/events.html" data-i18n="nav_activity">活动</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="javascript:void(0);" class="nav-link"><span data-i18n="nav_community">社区</span> <i class="fas fa-caret-down"></i></a>
+                    <ul class="submenu">
+                        <li><a href="https://x.com/hajimi_CTO_BNB" target="_blank">Twitter</a></li>
+                        <li><a href="https://t.me/BNB_Hajimiiii" target="_blank">TG</a></li>
+                        <li><a href="https://www.tiktok.com/@hajimi_bnb" target="_blank">tiktok</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 右侧区域：语言切换 -->
+            <div class="nav-right">
+                <div class="lang-switch" id="lang-switch">
+                    <span class="current-lang">中文</span>
+                    <i class="fas fa-caret-down"></i>
+                    <ul class="lang-dropdown">
+                        <li data-lang="zh">中文</li>
+                        <li data-lang="en">English</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 汉堡菜单按钮 -->
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 慈善页面主要内容 -->
+    <div class="charity-wrapper">
+        
+        <!-- 头部 Banner -->
+        <header class="charity-header">
+            <div class="header-content">
+                <h1 class="main-title" data-i18n="page_title">哈基米慈善</h1>
+                <p class="subtitle" data-i18n="page_subtitle">让爱心像猫咪一样温暖世界的每一个角落</p>
+                
+                <div class="donation-container">
+                    <span class="donation-label" data-i18n="donation_label">捐赠地址:</span>
+                    <button class="donation-btn" id="copy-donation" data-clipboard-text="0x371554a95D08F54B4148DB1E2735CAaD63aB6010">
+                        <i class="far fa-copy"></i>
+                        <span>bsc：0x371554a95D08F54B4148DB1E2735CAaD63aB6010</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 背景装饰 (移除图片，改为 CSS 控制) -->
+        </header>
+
+        <!-- 介绍部分 -->
+        <section class="intro-section container">
+            <div class="intro-card">
+                <div class="intro-text">
+                    <h2 data-i18n="intro_title">关于哈基米慈善</h2>
+                    <p data-i18n="intro_text_1">哈基米基金会致力于通过社区的力量，关爱流浪动物，并为需要帮助的群体提供援助。我们相信，每一份微小的善意，汇聚起来都能成为改变世界的力量。</p>
+                    <p data-i18n="intro_text_2">每一次的哈基米文化传播和慈善行动，都是对世界最好的回报。</p>
+                </div>
+                <div class="intro-image">
+                    <img src="images/beneficence_logo.jpg" alt="Charity Foundation">
+                </div>
+            </div>
+        </section>
+
+        <!-- 慈善项目展示 -->
+        <section class="projects-section container">
+            <div class="project-grid">
+                <!-- 动态内容将由 JS 渲染 -->
+            </div>
+        </section>
+
+        <!-- 底部呼吁 -->
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2 data-i18n="cta_title">加入我们的行列</h2>
+                <p data-i18n="cta_text">无论是一次转发，还是一次捐赠，您的参与都至关重要。</p>
+                
+                <a href="https://t.me/BNB_Hajimiiii" target="_blank" class="cta-btn" data-i18n="cta_btn">联系我们</a>
+            </div>
+            <img src="/images/bg3_1.png" class="cta-bg" alt="bg">
+        </section>
+
+    </div>
+
+    <!-- 简单页脚 -->
+    <footer class="simple-footer">
+        <p data-i18n="footer_rights">© 2025 by Hajimi Community . All rights reserved!</p>
+    </footer>
+
+    <!-- 复用主站 JS 逻辑 (汉堡菜单等) -->
+    <script src="beneficence-nav.js"></script>
+    <script>
+        // --- 多语言配置 ---
+        const pageTranslations = {
+            'zh': {
+                'nav_home': '首页',
+                'nav_ecosystem': '哈基米生态',
+                'nav_culture': '哈基米文化',
+                'nav_concert': '音乐会',
+                'nav_emoji': '头像',
+                'nav_foundation': '基金会',
+                'nav_charity': '慈善',
+                'nav_activity': '活动',
+                'nav_community': '社区',
+                'page_title': '哈基米慈善',
+                'page_subtitle': '让爱心像猫咪一样温暖世界的每一个角落',
+                'intro_title': '关于哈基米慈善',
+                'intro_text_1': '哈基米基金会致力于通过社区的力量，关爱流浪动物，并为需要帮助的群体提供援助。我们相信，每一份微小的善意，汇聚起来都能成为改变世界的力量。',
+                'intro_text_2': '每一次的哈基米文化传播和慈善行动，都是对世界最好的回报。',
+                'cta_title': '加入我们的行列',
+                'cta_text': '无论是一次转发，还是一次捐赠，您的参与都至关重要。',
+                'cta_btn': '联系我们',
+                'footer_rights': '© 2025 by Hajimi Community . All rights reserved!',
+                'status_ongoing': '进行中',
+                'status_completed': '已完成',
+                'status_preparation': '筹备中',
+                'label_long_term': '长期活动',
+                'btn_view_details': '点击查看详情',
+                'btn_no_details': '暂无详情',
+                'donation_label': '捐赠地址:',
+                'copy_success': '复制成功!',
+                'copy_fail': '复制失败'
+            },
+            'en': {
+                'nav_home': 'Home',
+                'nav_ecosystem': 'Hajimi Ecosystem',
+                'nav_culture': 'Culture',
+                'nav_concert': 'Concert',
+                'nav_emoji': 'Avatar',
+                'nav_foundation': 'Foundation',
+                'nav_charity': 'Charity',
+                'nav_activity': 'Activity',
+                'nav_community': 'Community',
+                'page_title': 'Hajimi Beneficence',
+                'page_subtitle': 'Let love warm every corner of the world like a cat',
+                'intro_title': 'About Hajimi Charity',
+                'intro_text_1': 'Hajimi Foundation is dedicated to caring for stray animals and providing assistance to those in need through the power of the community. We believe that every small act of kindness, when gathered together, can become a force that changes the world.',
+                'intro_text_2': 'Every spread of Hajimi culture and charity action is the best return to the world.',
+                'cta_title': 'Join Us',
+                'cta_text': 'Whether it is a repost or a donation, your participation is crucial.',
+                'cta_btn': 'Contact Us',
+                'footer_rights': '© 2025 by Hajimi Community . All rights reserved!',
+                'status_ongoing': 'Ongoing',
+                'status_completed': 'Completed',
+                'status_preparation': 'Preparation',
+                'label_long_term': 'Long-term',
+                'btn_view_details': 'View Details',
+                'btn_no_details': 'No Details',
+                'donation_label': 'Donation Address:',
+                'copy_success': 'Copied successfully!',
+                'copy_fail': 'Copy failed'
+            }
+        };
+
+        let currentLang = localStorage.getItem('hajimi_lang') || 'zh';
+
+        // 设置语言函数
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('hajimi_lang', lang);
+            updatePageContent();
+        }
+        window.setPageLanguage = setLanguage;
+
+        // 获取翻译文本辅助函数
+        function getTrans(key) {
+            if (!pageTranslations[currentLang]) return key;
+            return pageTranslations[currentLang][key] || pageTranslations['zh'][key] || key;
+        }
+
+        // 更新页面内容
+        function updatePageContent() {
+            // 1. 更新静态文本
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const text = getTrans(key);
+                if (text) {
+                    element.innerText = text;
+                }
+            });
+
+            // 2. 更新语言切换器显示
+            const currentLangSpan = document.querySelector('.current-lang');
+            if (currentLangSpan) {
+                currentLangSpan.innerText = currentLang === 'en' ? 'English' : '中文';
+            }
+            
+            // 3. 更新 html lang 属性
+            document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+
+            // 4. 重新渲染项目列表
+            renderProjects();
+        }
+
+        // Toast 提示函数 (复制自主站)
+        function showToast(message, duration = 500) {
+            // 时间配置 (单位: ms)
+            const ANIMATION_IN = 150;  // 出现动画
+            const DURATION_STAY = duration; // 展示停留
+            const ANIMATION_OUT = 300; // 消失动画
+            
+            // 检查是否已存在 toast，防止重叠
+            let existingToast = document.querySelector('.toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerText = message;
+            
+            document.body.appendChild(toast);
+            
+            // 显示 toast (出现动画开始)
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // 停留结束后触发消失动画
+            setTimeout(() => {
+                toast.classList.remove('show'); // 触发淡出动画
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        document.body.removeChild(toast);
+                    }
+                }, ANIMATION_OUT); 
+            }, ANIMATION_IN + DURATION_STAY);
+        }
+
+        // --- 简单的汉堡菜单逻辑 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 导航栏逻辑已移至 beneficence-nav.js
+
+            // 初始化页面
+            initPage();
+
+            // 捐赠地址复制功能
+            const copyBtn = document.getElementById('copy-donation');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const textToCopy = copyBtn.getAttribute('data-clipboard-text');
+                    
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        // 成功反馈
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.classList.add('copied');
+                        copyBtn.innerHTML = `<i class="fas fa-check"></i> <span>${getTrans('copy_success')}</span>`;
+                        
+                        // 尝试调用主站的 toast
+                        if (typeof showToast === 'function') {
+                            showToast(getTrans('copy_success'));
+                        }
+
+                        setTimeout(() => {
+                            copyBtn.classList.remove('copied');
+                            copyBtn.innerHTML = originalHtml;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Copy failed:', err);
+                        // 降级方案
+                        const textArea = document.createElement("textarea");
+                        textArea.value = textToCopy;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            if (typeof showToast === 'function') {
+                                showToast(getTrans('copy_success'));
+                            }
+                        } catch (e) {
+                            if (typeof showToast === 'function') {
+                                showToast(getTrans('copy_fail'));
+                            }
+                        }
+                        document.body.removeChild(textArea);
+                    });
+                });
+            }
+        });
+
+        // --- 数据加载与渲染逻辑 ---
+        let cachedProjects = null;
+
+        async function initPage() {
+            await loadProjectsData();
+            setLanguage(currentLang);
+        }
+
+        async function loadProjectsData() {
+            // 1. 优先尝试加载 JSON 文件 (生产环境/导出数据)
+            try {
+                const response = await fetch('charity_projects.json?t=' + new Date().getTime());
+                if (response.ok) {
+                    cachedProjects = await response.json();
+                    console.log('Loaded projects from JSON file');
+                    return;
+                }
+            } catch (e) {
+                console.warn('JSON file load failed, checking localStorage...', e);
+            }
+
+            // 2. 后备：本地存储 (开发环境/Admin预览)
+            const STORAGE_KEY = 'hajimi_charity_projects';
+            const storedData = localStorage.getItem(STORAGE_KEY);
+            if (storedData) {
+                try {
+                    cachedProjects = JSON.parse(storedData);
+                    console.log('Loaded projects from localStorage');
+                } catch (e) {
+                    console.error('LocalStorage parse error', e);
+                }
+            }
+        }
+
+        function renderProjects() {
+            const projectGrid = document.querySelector('.project-grid');
+            if (!projectGrid) return;
+            
+            const projects = cachedProjects;
+
+            if (Array.isArray(projects) && projects.length > 0) {
+                // 清空现有静态内容
+                projectGrid.innerHTML = '';
+                
+                const now = new Date();
+
+                projects.forEach(p => {
+                    // Debug logging
+                    if (currentLang === 'en' && !p.title_en) {
+                        console.warn('Project missing English title:', p.title);
+                    }
+
+                    // 兼容旧数据
+                    if (!p.type) p.type = 'limited-time';
+
+                    // 计算状态
+                    let status = 'ongoing';
+                    const start = new Date(p.startDate);
+                    
+                    if (p.type === 'long-term') {
+                        if (p.startDate && start > now) {
+                            status = 'preparation';
+                        } else {
+                            status = 'ongoing';
+                        }
+                    } else {
+                        const end = new Date(p.endDate);
+                        end.setHours(23, 59, 59, 999);
+                        if (now < start) status = 'preparation';
+                        else if (now > end) status = 'completed';
+                        else status = 'ongoing';
+                    }
+
+                    const statusLabels = {
+                        'ongoing': getTrans('status_ongoing'),
+                        'completed': getTrans('status_completed'),
+                        'preparation': getTrans('status_preparation')
+                    };
+
+                    // 构建 HTML
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    
+                    // 处理状态标签样式
+                    let tagClass = 'tag ' + status;
+                    
+                    // 格式化日期
+                    const startDateStr = p.startDate ? p.startDate.replace(/-/g, '.') : '';
+                    let dateStr = startDateStr;
+                    
+                    if (p.type === 'long-term') {
+                        dateStr += ` (${getTrans('label_long_term')})`;
+                    } else {
+                        const endDateStr = p.endDate ? p.endDate.replace(/-/g, '.') : '?';
+                        dateStr += ' - ' + endDateStr;
+                    }
+                    
+                    // 详情链接处理
+                    const link = (p.link && p.link !== '#') ? p.link : '';
+                    const btnText = getTrans('btn_view_details');
+                    const noDetailsText = getTrans('btn_no_details');
+                    
+                    const btnHtml = link 
+                        ? `<button class="btn-detail" onclick="window.location.href='${link}'">${btnText}</button>`
+                        : `<button class="btn-detail" style="opacity:0.5;cursor:not-allowed;">${noDetailsText}</button>`;
+                    
+                    // --- 多语言内容选择 ---
+                    // 优先使用当前语言，如果没有则回退到默认（中文）
+                    const title = currentLang === 'en' ? (p.title_en || p.title) : p.title;
+                    const desc = currentLang === 'en' ? (p.desc_en || p.desc) : p.desc;
+
+                    card.innerHTML = `
+                        <div class="card-image">
+                            <img src="${p.image}" alt="${title}">
+                        </div>
+                        <div class="card-body">
+                            <span class="${tagClass}">${statusLabels[status]}</span>
+                            <h3>${title}</h3>
+                            <p class="desc">${desc}</p>
+                            <div class="card-actions">
+                                <p class="duration"><i class="far fa-clock"></i> ${dateStr}</p>
+                                ${btnHtml}
+                            </div>
+                        </div>
+                    `;
+                    projectGrid.appendChild(card);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
