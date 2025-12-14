@@ -23,7 +23,7 @@ We made this site for one reason only: **to have fun and keep huffing that Hajim
 
 ---
 
-## 贡献 / Contribute / 기여하기
+## 贡献 / Contribute 
 欢迎通过 Issue / PR 提交你的内容：  
 - 新梗、新图、新文案  
 - 活动/玩法提案  
